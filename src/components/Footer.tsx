@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, ExternalLink, Heart, Code, Database } from 'lucide-react';
+import { Star, ExternalLink, Heart, Play } from 'lucide-react';
 
 const GithubIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -9,111 +9,150 @@ const GithubIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const ecosystemProjects = [
+    {
+      name: 'Only Study Gallery',
+      purpose: 'Daily study screenshots and proof gallery — shows how much was studied each day.',
+      live: 'https://only-study-gellery.pages.dev/',
+      repo: 'https://github.com/SudhirDevOps1/ONLY-STUDY-GELLERY',
+      border: 'border-pink-500/30',
+      from: 'from-pink-500/10',
+      badge: 'from-pink-500 to-rose-600',
+      icon: '📸'
+    },
+    {
+      name: 'My All Classes',
+      purpose: 'Daily class-wise study schedule JSON data — tracks what was studied and when.',
+      live: 'https://my-all-classes.pages.dev/',
+      repo: 'https://github.com/SudhirDevOps1/My-All-Classes',
+      border: 'border-blue-500/30',
+      from: 'from-blue-500/10',
+      badge: 'from-blue-500 to-cyan-600',
+      icon: '📚'
+    },
+    {
+      name: 'Ultimate Master Study Tracker',
+      purpose: 'The main FlowTrack engine — precision timer, gamification, and analytics in one place.',
+      live: 'https://the-ultimate-master-study-tracker.vercel.app/',
+      repo: 'https://github.com/SudhirDevOps1/The-Ultimate-Master-Study-Tracker',
+      border: 'border-purple-500/30',
+      from: 'from-purple-500/10',
+      badge: 'from-purple-500 to-fuchsia-600',
+      icon: '⚡'
+    }
+  ];
 
   return (
     <footer className="relative z-10 border-t border-white/[0.08] bg-slate-900/40 backdrop-blur-2xl mt-auto">
-      {/* Gradient line at top */}
       <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-      
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8 lg:py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-blue-500 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/25">
-                <span className="text-sm font-bold">⚡</span>
-              </div>
-              <span className="text-lg font-bold gradient-text">FlowTrack</span>
-            </div>
-            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
-              The ultimate study tracking ecosystem for relentless learners.
-            </p>
-          </div>
 
-          {/* Made By */}
-          <div>
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-gray-500 mb-3">
-              Developer
-            </h4>
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-8 sm:py-10 lg:py-12">
+
+        {/* ===== TOP ROW: Brand + Author ===== */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+              <span className="text-lg font-bold">⚡</span>
+            </div>
+            <div>
+              <span className="text-xl font-bold gradient-text">FlowTrack</span>
+              <p className="text-xs text-gray-500 mt-0.5">Study Tracker Pro — Read-only dashboard</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
             <a
               href="https://github.com/SudhirDevOps1"
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 mb-3 hover:gap-3 transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.08] hover:bg-white/10 transition-all group"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center group-hover:from-purple-500/40 group-hover:to-blue-500/40 transition-all">
-                <Code className="w-4 h-4 text-purple-400" />
-              </div>
-              <span className="text-sm font-medium text-white group-hover:text-purple-300 transition-colors">
-                @SudhirDevOps1
-              </span>
+              <GithubIcon className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+              <span className="text-xs text-gray-400 group-hover:text-white transition-colors">@SudhirDevOps1</span>
             </a>
             <a
               href="https://github.com/SudhirDevOps1/The-Ultimate-Master-Study-Tracker"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/20 transition-all group"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/20 transition-all group"
             >
               <Star className="w-3.5 h-3.5 text-yellow-400 group-hover:fill-yellow-400 transition-all" />
-              <span className="text-xs font-medium text-yellow-300">Star on GitHub</span>
-              <ExternalLink className="w-3 h-3 text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="text-xs font-medium text-yellow-300">Star</span>
             </a>
-          </div>
-
-          {/* Data Source */}
-          <div>
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-gray-500 mb-3">
-              Data Source
-            </h4>
-            <a
-              href="https://github.com/SudhirDevOps1/My-All-Classes"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-start gap-2 mb-2 hover:gap-3 transition-all"
-            >
-              <Database className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-white group-hover:text-blue-300 transition-colors">
-                  My All Classes
-                </p>
-                <p className="text-xs text-gray-500">Daily schedules repo</p>
-              </div>
-            </a>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              JSON files auto-scanned from the data directory
-            </p>
-          </div>
-
-          {/* Useful Links */}
-          <div>
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-gray-500 mb-3">
-              Useful Links
-            </h4>
-            <div className="space-y-2">
-              <a
-                href="https://the-ultimate-master-study-tracker.vercel.app/dashboard"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-purple-400" />
-                <span>Original Dashboard</span>
-              </a>
-              <a
-                href="https://github.com/SudhirDevOps1/The-Ultimate-Master-Study-Tracker"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                <GithubIcon className="w-3.5 h-3.5 text-purple-400" />
-                <span>Source Code</span>
-              </a>
-            </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* ===== ECOSYSTEM SECTION ===== */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-5">
+            <Play className="w-4 h-4 text-purple-400" />
+            <h3 className="text-sm font-semibold text-white">Free Open Study Ecosystem</h3>
+            <div className="h-px flex-1 bg-gradient-to-r from-white/[0.08] to-transparent ml-3" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {ecosystemProjects.map(project => (
+              <div
+                key={project.name}
+                className={`rounded-xl border ${project.border} bg-gradient-to-br ${project.from} via-transparent to-transparent backdrop-blur-sm p-5 group hover:bg-white/[0.04] transition-all duration-300`}
+              >
+                {/* Card header */}
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center text-xl flex-shrink-0 group-hover:scale-110 transition-transform">
+                    {project.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-semibold text-white truncate">{project.name}</h4>
+                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-white bg-gradient-to-r ${project.badge}`}>
+                      {project.name === 'Only Study Gallery' ? 'Proof Gallery' : project.name === 'My All Classes' ? 'Schedule Data' : 'Tracker Engine'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Purpose */}
+                <p className="text-xs text-gray-400 leading-relaxed mb-4 min-h-[2.5rem]">
+                  {project.purpose}
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2">
+                  <a
+                    href={project.live}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-white transition-all"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Live Demo
+                  </a>
+                  <a
+                    href={project.repo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-white transition-all"
+                  >
+                    <GithubIcon className="w-3.5 h-3.5" />
+                    Repository
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ===== WHOLE WORKFLOW NOTE ===== */}
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 text-xs text-gray-400">
+            <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-medium text-[10px] uppercase tracking-wider">How It Works</span>
+            <span>
+              <strong className="text-gray-300">Only Study Gallery</strong> for daily screenshot proof →
+              <strong className="text-gray-300"> My All Classes</strong> for JSON schedule data →
+              <strong className="text-gray-300"> FlowTrack</strong> for the analytics dashboard. All three are free and open-source.
+            </span>
+          </div>
+        </div>
+
+        {/* ===== BOTTOM BAR ===== */}
+        <div className="pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-500 text-center sm:text-left">
             © {currentYear} FlowTrack Pro. Built with{' '}
             <Heart className="w-3 h-3 inline text-red-400 fill-red-400 mx-0.5" />
@@ -122,15 +161,9 @@ const Footer: React.FC = () => {
           <div className="flex items-center gap-3">
             <span className="text-xs text-gray-600 hidden sm:inline">Powered by</span>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-medium text-cyan-400">
-                React
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-[10px] font-medium text-blue-400">
-                TypeScript
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[10px] font-medium text-purple-400">
-                Tailwind
-              </span>
+              <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-medium text-cyan-400">React</span>
+              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-[10px] font-medium text-blue-400">TypeScript</span>
+              <span className="px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[10px] font-medium text-purple-400">Tailwind</span>
             </div>
           </div>
         </div>

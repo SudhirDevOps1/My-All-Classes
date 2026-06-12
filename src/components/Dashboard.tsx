@@ -5,6 +5,7 @@ import { calculateDayStats, getUpcomingSession, getCurrentSession, getSubjectByI
 import { formatTime, formatDuration, formatDurationMinutes, calculateProgress } from '../utils/dateUtils';
 import { Clock, Target, Zap, ChevronRight, TrendingUp, Award } from 'lucide-react';
 import SessionDetailModal from './SessionDetailModal';
+import QuickStats from './QuickStats';
 
 interface DashboardProps {
   data: DayData;
@@ -43,7 +44,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     ? Math.round((stats.totalActualSeconds / (stats.totalPlannedMinutes * 60)) * 100) 
     : 0;
 
-  // Calculate efficiency
   const efficiency = stats.totalPlannedMinutes > 0 
     ? Math.round((stats.totalActualSeconds / (stats.totalPlannedMinutes * 60)) * 100)
     : 0;
@@ -55,6 +55,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       initial="hidden"
       animate="visible"
     >
+      {/* Quick Stats Row */}
+      <motion.div variants={itemVariants}>
+        <QuickStats data={data} />
+      </motion.div>
+
       {/* Stats Overview */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
         <StatCard
@@ -210,70 +215,77 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           </h3>
           <span className="text-xs text-gray-500 hidden sm:inline">Click for details</span>
         </div>
-        <div className="space-y-2 sm:space-y-3">
-          {data.sessions.map((session, index) => {
-            const subject = getSubjectById(data.subjects, session.subjectId);
-            const progress = calculateProgress(session.actualSeconds, session.plannedMinutes);
-            const status = normalizeStatus(session.status);
-            
-            return (
-              <motion.div
-                key={session.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.01, x: 4 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => setSelectedSession({ session, subject })}
-                className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/5 border border-white/[0.04] cursor-pointer transition-all hover:bg-white/10 hover:border-white/[0.08] hover:shadow-lg group"
-              >
-                <motion.div 
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center text-lg sm:text-2xl flex-shrink-0 transition-transform group-hover:scale-110"
-                  style={{ backgroundColor: `${session.colorTag}20` }}
+        
+        {data.sessions.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            No sessions scheduled for this day.
+          </div>
+        ) : (
+          <div className="space-y-2 sm:space-y-3">
+            {data.sessions.map((session, index) => {
+              const subject = getSubjectById(data.subjects, session.subjectId);
+              const progress = calculateProgress(session.actualSeconds, session.plannedMinutes);
+              const status = normalizeStatus(session.status);
+              
+              return (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.01, x: 4 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => setSelectedSession({ session, subject })}
+                  className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/5 border border-white/[0.04] cursor-pointer transition-all hover:bg-white/10 hover:border-white/[0.08] hover:shadow-lg group"
                 >
-                  {status === 'completed' ? '✅' : status === 'in-progress' ? '🔄' : '⏳'}
+                  <motion.div 
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center text-lg sm:text-2xl flex-shrink-0 transition-transform group-hover:scale-110"
+                    style={{ backgroundColor: `${session.colorTag}20` }}
+                  >
+                    {status === 'completed' ? '✅' : status === 'in-progress' ? '🔄' : '⏳'}
+                  </motion.div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                      <h4 className="text-white font-medium truncate text-sm sm:text-base">{subject?.name || 'Unknown'}</h4>
+                      <span 
+                        className="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 uppercase tracking-wide"
+                        style={{ 
+                          backgroundColor: `${session.colorTag}20`,
+                          color: session.colorTag
+                        }}
+                      >
+                        {session.status.replace('_', ' ')}
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-gray-400 truncate">{session.notes}</p>
+                    <div className="flex items-center gap-2 sm:gap-4 mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-500">
+                      <span className="truncate">{formatTime(session.startTime)} - {formatTime(session.endTime)}</span>
+                      <span className="flex-shrink-0">Planned: {session.plannedMinutes}min</span>
+                      <span className="flex-shrink-0">Actual: {formatDuration(session.actualSeconds)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <div className="text-right">
+                      <div className="text-xs sm:text-sm font-medium text-white">{progress}%</div>
+                    </div>
+                    <div className="w-16 sm:w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ backgroundColor: session.colorTag }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.5, delay: index * 0.05 }}
+                      />
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+                  </div>
                 </motion.div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
-                    <h4 className="text-white font-medium truncate text-sm sm:text-base">{subject?.name || 'Unknown'}</h4>
-                    <span 
-                      className="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 uppercase tracking-wide"
-                      style={{ 
-                        backgroundColor: `${session.colorTag}20`,
-                        color: session.colorTag
-                      }}
-                    >
-                      {session.status.replace('_', ' ')}
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-gray-400 truncate">{session.notes}</p>
-                  <div className="flex items-center gap-2 sm:gap-4 mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-500">
-                    <span className="truncate">{formatTime(session.startTime)} - {formatTime(session.endTime)}</span>
-                    <span className="flex-shrink-0">Planned: {session.plannedMinutes}min</span>
-                    <span className="flex-shrink-0">Actual: {formatDuration(session.actualSeconds)}</span>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                  <div className="text-right">
-                    <div className="text-xs sm:text-sm font-medium text-white">{progress}%</div>
-                  </div>
-                  <div className="w-16 sm:w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: session.colorTag }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progress}%` }}
-                      transition={{ duration: 0.5, delay: index * 0.05 }}
-                    />
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </motion.div>
 
       {/* Session Detail Modal */}

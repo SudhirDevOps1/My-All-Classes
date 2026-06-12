@@ -61,24 +61,36 @@ const App: React.FC = () => {
     }
 
     const localStorageDates: string[] = [];
+
+    // Helper to register a date entry from localStorage
+    const registerLocalEntry = (dateKey: string, raw: string | null) => {
+      if (!raw || dateStrings.has(dateKey)) return;
+      try {
+        const data = JSON.parse(raw) as DayData;
+        const [day, month, year] = dateKey.split('-').map(Number);
+        if (day && month && year) {
+          datesMap[dateKey] = data;
+          dates.push(new Date(year, month - 1, day));
+          dateStrings.add(dateKey);
+          localStorageDates.push(`${dateKey}.json`);
+        }
+      } catch {}
+    };
+
+    // Pass 1: user-imported data (STORAGE_PREFIX) takes priority.
+    // Note: CACHE_PREFIX keys also start with STORAGE_PREFIX, so exclude them.
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(STORAGE_PREFIX) && !key.startsWith(CACHE_PREFIX)) {
+        registerLocalEntry(key.replace(STORAGE_PREFIX, ''), localStorage.getItem(key));
+      }
+    }
+
+    // Pass 2: cached fetched data (CACHE_PREFIX) fills in remaining dates.
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key?.startsWith(CACHE_PREFIX)) {
-        const dateKey = key.replace(CACHE_PREFIX, '');
-        if (!dateStrings.has(dateKey)) {
-          try {
-            const cached = localStorage.getItem(key);
-            if (cached) {
-              const data = JSON.parse(cached) as DayData;
-              datesMap[dateKey] = data;
-              const [day, month, year] = dateKey.split('-').map(Number);
-              if (day && month && year) {
-                dates.push(new Date(year, month - 1, day));
-                dateStrings.add(dateKey);
-              }
-            }
-          } catch {}
-        }
+        registerLocalEntry(key.replace(CACHE_PREFIX, ''), localStorage.getItem(key));
       }
     }
 
@@ -297,7 +309,7 @@ const App: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-1.5 sm:p-2 rounded-xl hover:bg-white/10 transition-colors flex-shrink-0"
+                className="lg:hidden p-1.5 sm:p-2 rounded-xl hover:bg-white/10 transition-colors flex-shrink-0 text-white"
               >
                 {sidebarOpen ? <X size={18} className="sm:w-5 sm:h-5" /> : <Menu size={18} className="sm:w-5 sm:h-5" />}
               </motion.button>
