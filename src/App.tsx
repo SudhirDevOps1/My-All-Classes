@@ -19,6 +19,39 @@ import { Menu, X, Download, Loader2, Sparkles, Wifi, WifiOff } from 'lucide-reac
 const STORAGE_PREFIX = 'flowtrack_';
 const CACHE_PREFIX = 'flowtrack_cache_';
 const MANIFEST_URL = '/data/file-manifest.json';
+const REMOTE_DATA_BASE_URL = 'https://my-all-classes.pages.dev/data';
+const REQUEST_TIMEOUT_MS = 8000;
+
+const fetchWithTimeout = async (url: string, options: RequestInit = {}) => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+};
+
+const fetchJsonFromSources = async <T,>(path: string): Promise<T | null> => {
+  const urls = [
+    path,
+    `${REMOTE_DATA_BASE_URL}/${path.replace(/^\/data\//, '')}`
+  ];
+
+  for (const url of [...new Set(urls)]) {
+    try {
+      const response = await fetchWithTimeout(url, { cache: 'no-cache' });
+      if (response.ok) {
+        return await response.json() as T;
+      }
+    } catch {}
+  }
+
+  return null;
+};
 
 interface DateDataMap {
   [key: string]: DayData;
@@ -43,6 +76,11 @@ const App: React.FC = () => {
   const [showP2PGuide, setShowP2PGuide] = useState(false);
   const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
   const fetchedRef = useRef<Set<string>>(new Set());
+  const loadedDatesRef = useRef<DateDataMap>({});
+
+  useEffect(() => {
+    loadedDatesRef.current = loadedDates;
+  }, [loadedDates]);
   
   // WebConnect P2P sync (optional, disabled by default)
   // Official API: https://webconnect.js.org/#api-connect-to-a-channel
@@ -99,12 +137,9 @@ const App: React.FC = () => {
     // Merge: manifest list + fallback list + auto-generated date range (90 days back → 14 days forward)
     let manifestFiles: string[] = [];
     try {
-      const manifestRes = await fetch(MANIFEST_URL);
-      if (manifestRes.ok) {
-        const manifest = await manifestRes.json();
-        if (Array.isArray(manifest.files)) {
-          manifestFiles = manifest.files;
-        }
+      const manifest = await fetchJsonFromSources<{ files?: string[] }>(MANIFEST_URL);
+      if (manifest && Array.isArray(manifest.files)) {
+        manifestFiles = manifest.files;
       }
     } catch {}
 
@@ -126,27 +161,26 @@ const App: React.FC = () => {
     const BATCH_SIZE = 20;
     setScanProgress({ current: 0, total: allCandidateFiles.length });
 
-    const fetchFile = async (filename: string, idx: number) => {
+    const fetchFile = async (filename: string) => {
       const dateKey = filename.replace('.json', '');
 
       // Skip dates already loaded from localStorage
       if (datesMap[dateKey]) {
-        setScanProgress(prev => ({ ...prev, current: idx + 1 }));
+        setScanProgress(prev => ({ ...prev, current: Math.min(prev.current + 1, prev.total) }));
         return;
       }
 
       // Skip if already fetched in this session (cache hit)
       if (fetchedRef.current.has(dateKey)) {
-        setScanProgress(prev => ({ ...prev, current: idx + 1 }));
+        setScanProgress(prev => ({ ...prev, current: Math.min(prev.current + 1, prev.total) }));
         return;
       }
 
       fetchedRef.current.add(dateKey);
 
       try {
-        const response = await fetch(`/data/${filename}`, { cache: 'no-cache' });
-        if (response.ok) {
-          const data = await response.json() as DayData;
+        const data = await fetchJsonFromSources<DayData>(`/data/${filename}`);
+        if (data) {
           datesMap[dateKey] = data;
           try {
             localStorage.setItem(CACHE_PREFIX + dateKey, JSON.stringify(data));
@@ -158,13 +192,13 @@ const App: React.FC = () => {
           }
         }
       } catch {}
-      setScanProgress(prev => ({ ...prev, current: idx + 1 }));
+      setScanProgress(prev => ({ ...prev, current: Math.min(prev.current + 1, prev.total) }));
     };
 
     // Run fetches in batches of 20 to avoid overwhelming the browser
     for (let i = 0; i < allCandidateFiles.length; i += BATCH_SIZE) {
       const batch = allCandidateFiles.slice(i, i + BATCH_SIZE);
-      await Promise.all(batch.map((f, j) => fetchFile(f, i + j)));
+      await Promise.all(batch.map((f) => fetchFile(f)));
     }
 
     // ── Step 3.5: Fall back to cached offline fetched data (CACHE_PREFIX) ──
@@ -189,6 +223,7 @@ const App: React.FC = () => {
 
     const sortedDates = dates.sort((a, b) => b.getTime() - a.getTime());
     setAvailableDates(sortedDates);
+    loadedDatesRef.current = datesMap;
     setLoadedDates(datesMap);
     setScanning(false);
 
@@ -237,11 +272,14 @@ const App: React.FC = () => {
     try {
       // 1. Always attempt to fetch fresh online data first (Live Server Fetch)
       //    NOTE: Must use `.json` extension when fetching from /data/
-      const res = await fetch(`/data/${jsonFilename}`, { cache: 'no-cache' });
-      if (res.ok) {
-        const freshData = await res.json() as DayData;
+      const freshData = await fetchJsonFromSources<DayData>(`/data/${jsonFilename}`);
+      if (freshData) {
         setDayData(freshData);
-        setLoadedDates(prev => ({ ...prev, [dateKey]: freshData }));
+        setLoadedDates(prev => {
+          const next = { ...prev, [dateKey]: freshData };
+          loadedDatesRef.current = next;
+          return next;
+        });
         try {
           localStorage.setItem(CACHE_PREFIX + dateKey, JSON.stringify(freshData));
         } catch {}
@@ -262,8 +300,8 @@ const App: React.FC = () => {
     }
 
     // 3. Fall back to cached SWR data (already in state from auto-scan)
-    if (loadedDates[dateKey]) {
-      setDayData(loadedDates[dateKey]);
+    if (loadedDatesRef.current[dateKey]) {
+      setDayData(loadedDatesRef.current[dateKey]);
       setLoading(false);
       return;
     }
@@ -288,7 +326,7 @@ const App: React.FC = () => {
 
     setDayData(null);
     setLoading(false);
-  }, [loadedDates]);
+  }, []);
 
   useEffect(() => {
     loadDataForDate(currentDate);
@@ -317,7 +355,11 @@ const App: React.FC = () => {
     setDayData(data);
     setShowImport(false);
     
-    setLoadedDates(prev => ({ ...prev, [filename]: data }));
+    setLoadedDates(prev => {
+      const next = { ...prev, [filename]: data };
+      loadedDatesRef.current = next;
+      return next;
+    });
     
     setAvailableDates(prev => {
       const exists = prev.some(d => isSameDay(d, currentDate));
@@ -349,6 +391,7 @@ const App: React.FC = () => {
         localStorage.removeItem(key);
       }
     }
+    loadedDatesRef.current = {};
     setLoadedDates({});
     const result = await autoScanFiles();
     if (result && result.sortedDates.length > 0) {
