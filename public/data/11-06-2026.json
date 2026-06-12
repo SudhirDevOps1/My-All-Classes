@@ -1,0 +1,128 @@
+{
+  "app": "FlowTrack",
+  "exportedAt": "2026-06-11T18:00:00.000Z",
+  "subjects": [
+    {
+      "id": "ai_ml_001",
+      "name": "AI / ML Study",
+      "color": "#9C27B0",
+      "createdAt": "2026-06-11T07:00:00.000Z"
+    },
+    {
+      "id": "webdev_002",
+      "name": "Web Development",
+      "color": "#2196F3",
+      "createdAt": "2026-06-11T07:00:00.000Z"
+    },
+    {
+      "id": "java_003",
+      "name": "Java Programming",
+      "color": "#FF5722",
+      "createdAt": "2026-06-11T07:00:00.000Z"
+    },
+    {
+      "id": "assignment_004",
+      "name": "Assignment / Exam Prep",
+      "color": "#F44336",
+      "createdAt": "2026-06-11T07:00:00.000Z"
+    },
+    {
+      "id": "english_005",
+      "name": "English Language",
+      "color": "#00BCD4",
+      "createdAt": "2026-06-11T07:00:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "session_ai_1",
+      "subjectId": "ai_ml_001",
+      "startTime": "2026-06-11T04:45:00.000Z",
+      "endTime": "2026-06-11T06:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 7140,
+      "colorTag": "#9C27B0",
+      "notes": "AI/ML: Neural Networks & backpropagation deep dive",
+      "tags": ["focus"],
+      "status": "completed",
+      "createdAt": "2026-06-11T04:45:00.000Z",
+      "updatedAt": "2026-06-11T06:44:30.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_web_1",
+      "subjectId": "webdev_002",
+      "startTime": "2026-06-11T07:00:00.000Z",
+      "endTime": "2026-06-11T09:00:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 6980,
+      "colorTag": "#2196F3",
+      "notes": "Web Dev: React hooks + custom hook practice",
+      "tags": ["focus"],
+      "status": "completed",
+      "createdAt": "2026-06-11T07:00:00.000Z",
+      "updatedAt": "2026-06-11T08:56:20.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_java_1",
+      "subjectId": "java_003",
+      "startTime": "2026-06-11T09:30:00.000Z",
+      "endTime": "2026-06-11T11:30:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 7200,
+      "colorTag": "#FF5722",
+      "notes": "Java: Collections Framework + Stream API",
+      "tags": ["focus"],
+      "status": "completed",
+      "createdAt": "2026-06-11T09:30:00.000Z",
+      "updatedAt": "2026-06-11T11:30:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_eng_1",
+      "subjectId": "english_005",
+      "startTime": "2026-06-11T11:45:00.000Z",
+      "endTime": "2026-06-11T12:45:00.000Z",
+      "plannedMinutes": 60,
+      "actualSeconds": 3600,
+      "colorTag": "#00BCD4",
+      "notes": "English: Vocabulary + grammar exercises",
+      "tags": ["focus"],
+      "status": "completed",
+      "createdAt": "2026-06-11T11:45:00.000Z",
+      "updatedAt": "2026-06-11T12:45:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_assign_1",
+      "subjectId": "assignment_004",
+      "startTime": "2026-06-11T12:45:00.000Z",
+      "endTime": "2026-06-11T14:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 6540,
+      "colorTag": "#F44336",
+      "notes": "Assignment / Exam Prep: completed DBMS assignment",
+      "tags": ["focus"],
+      "status": "completed",
+      "createdAt": "2026-06-11T12:45:00.000Z",
+      "updatedAt": "2026-06-11T14:34:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    }
+  ]
+}

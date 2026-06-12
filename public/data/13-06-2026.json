@@ -1,0 +1,128 @@
+{
+  "app": "FlowTrack",
+  "exportedAt": "2026-06-13T00:00:00.000Z",
+  "subjects": [
+    {
+      "id": "ai_ml_001",
+      "name": "AI / ML Study",
+      "color": "#9C27B0",
+      "createdAt": "2026-06-13T00:00:00.000Z"
+    },
+    {
+      "id": "webdev_002",
+      "name": "Web Development",
+      "color": "#2196F3",
+      "createdAt": "2026-06-13T00:00:00.000Z"
+    },
+    {
+      "id": "java_003",
+      "name": "Java Programming",
+      "color": "#FF5722",
+      "createdAt": "2026-06-13T00:00:00.000Z"
+    },
+    {
+      "id": "assignment_004",
+      "name": "Assignment / Exam Prep",
+      "color": "#F44336",
+      "createdAt": "2026-06-13T00:00:00.000Z"
+    },
+    {
+      "id": "english_005",
+      "name": "English Language",
+      "color": "#00BCD4",
+      "createdAt": "2026-06-13T00:00:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "session_ai_3",
+      "subjectId": "ai_ml_001",
+      "startTime": "2026-06-13T04:45:00.000Z",
+      "endTime": "2026-06-13T06:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#9C27B0",
+      "notes": "AI/ML: Computer Vision with OpenCV + CNN practice",
+      "tags": ["focus"],
+      "status": "planned",
+      "createdAt": "2026-06-13T00:00:00.000Z",
+      "updatedAt": "2026-06-13T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_web_3",
+      "subjectId": "webdev_002",
+      "startTime": "2026-06-13T07:00:00.000Z",
+      "endTime": "2026-06-13T09:00:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#2196F3",
+      "notes": "Web Dev: Next.js Server Components + routing",
+      "tags": ["focus"],
+      "status": "planned",
+      "createdAt": "2026-06-13T00:00:00.000Z",
+      "updatedAt": "2026-06-13T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_java_3",
+      "subjectId": "java_003",
+      "startTime": "2026-06-13T09:30:00.000Z",
+      "endTime": "2026-06-13T11:30:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#FF5722",
+      "notes": "Java: Multithreading & Concurrency problems",
+      "tags": ["focus"],
+      "status": "planned",
+      "createdAt": "2026-06-13T00:00:00.000Z",
+      "updatedAt": "2026-06-13T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_eng_3",
+      "subjectId": "english_005",
+      "startTime": "2026-06-13T11:45:00.000Z",
+      "endTime": "2026-06-13T12:45:00.000Z",
+      "plannedMinutes": 60,
+      "actualSeconds": 0,
+      "colorTag": "#00BCD4",
+      "notes": "English: Essay writing + reading comprehension",
+      "tags": ["focus"],
+      "status": "planned",
+      "createdAt": "2026-06-13T00:00:00.000Z",
+      "updatedAt": "2026-06-13T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_assign_3",
+      "subjectId": "assignment_004",
+      "startTime": "2026-06-13T12:45:00.000Z",
+      "endTime": "2026-06-13T14:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#F44336",
+      "notes": "Assignment / Exam Prep: OS & CN revision",
+      "tags": ["focus"],
+      "status": "planned",
+      "createdAt": "2026-06-13T00:00:00.000Z",
+      "updatedAt": "2026-06-13T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    }
+  ]
+}

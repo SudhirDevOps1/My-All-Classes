@@ -1,0 +1,128 @@
+{
+  "app": "FlowTrack",
+  "exportedAt": "2026-06-14T00:00:00.000Z",
+  "subjects": [
+    {
+      "id": "ai_ml_001",
+      "name": "AI / ML Study",
+      "color": "#9C27B0",
+      "createdAt": "2026-06-14T00:00:00.000Z"
+    },
+    {
+      "id": "webdev_002",
+      "name": "Web Development",
+      "color": "#2196F3",
+      "createdAt": "2026-06-14T00:00:00.000Z"
+    },
+    {
+      "id": "java_003",
+      "name": "Java Programming",
+      "color": "#FF5722",
+      "createdAt": "2026-06-14T00:00:00.000Z"
+    },
+    {
+      "id": "assignment_004",
+      "name": "Assignment / Exam Prep",
+      "color": "#F44336",
+      "createdAt": "2026-06-14T00:00:00.000Z"
+    },
+    {
+      "id": "english_005",
+      "name": "English Language",
+      "color": "#00BCD4",
+      "createdAt": "2026-06-14T00:00:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "session_ai_4",
+      "subjectId": "ai_ml_001",
+      "startTime": "2026-06-14T05:00:00.000Z",
+      "endTime": "2026-06-14T08:00:00.000Z",
+      "plannedMinutes": 180,
+      "actualSeconds": 0,
+      "colorTag": "#9C27B0",
+      "notes": "AI/ML: Deep dive into Transformers & attention mechanism (3 hours)",
+      "tags": ["focus", "weekend"],
+      "status": "planned",
+      "createdAt": "2026-06-14T00:00:00.000Z",
+      "updatedAt": "2026-06-14T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_web_4",
+      "subjectId": "webdev_002",
+      "startTime": "2026-06-14T08:30:00.000Z",
+      "endTime": "2026-06-14T11:30:00.000Z",
+      "plannedMinutes": 180,
+      "actualSeconds": 0,
+      "colorTag": "#2196F3",
+      "notes": "Web Dev: Full project build - backend + frontend integration (3 hours)",
+      "tags": ["focus", "weekend"],
+      "status": "planned",
+      "createdAt": "2026-06-14T00:00:00.000Z",
+      "updatedAt": "2026-06-14T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_java_4",
+      "subjectId": "java_003",
+      "startTime": "2026-06-14T12:30:00.000Z",
+      "endTime": "2026-06-14T15:30:00.000Z",
+      "plannedMinutes": 180,
+      "actualSeconds": 0,
+      "colorTag": "#FF5722",
+      "notes": "Java: LeetCode medium problems - Trees & Graphs (3 hours)",
+      "tags": ["focus", "weekend"],
+      "status": "planned",
+      "createdAt": "2026-06-14T00:00:00.000Z",
+      "updatedAt": "2026-06-14T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_eng_4",
+      "subjectId": "english_005",
+      "startTime": "2026-06-14T15:45:00.000Z",
+      "endTime": "2026-06-14T17:00:00.000Z",
+      "plannedMinutes": 75,
+      "actualSeconds": 0,
+      "colorTag": "#00BCD4",
+      "notes": "English: Advanced vocabulary + IELTS practice",
+      "tags": ["focus"],
+      "status": "planned",
+      "createdAt": "2026-06-14T00:00:00.000Z",
+      "updatedAt": "2026-06-14T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_assign_4",
+      "subjectId": "assignment_004",
+      "startTime": "2026-06-14T17:00:00.000Z",
+      "endTime": "2026-06-14T19:30:00.000Z",
+      "plannedMinutes": 150,
+      "actualSeconds": 0,
+      "colorTag": "#F44336",
+      "notes": "Assignment / Exam Prep: Weekly revision + mock test",
+      "tags": ["focus", "weekend"],
+      "status": "planned",
+      "createdAt": "2026-06-14T00:00:00.000Z",
+      "updatedAt": "2026-06-14T00:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    }
+  ]
+}
