@@ -276,33 +276,62 @@ The production build outputs a **single self-contained `dist/index.html`** (via 
 
 ---
 
-## 🌐 WebConnect P2P Serverless Sync & Mobile Usage
+## 🌐 WebConnect P2P Serverless Sync — Official API Integration
 
-FlowTrack includes built-in **WebConnect** integration for true serverless multi-device peer-to-peer synchronization:
+FlowTrack includes built-in **WebConnect** integration for true serverless multi-device peer-to-peer synchronization using the official [webConnect.js](https://webconnect.js.org/) library.
+
+### 🔧 How to Enable (Official API)
 
 ```typescript
-// How to Enable in src/App.tsx
-const { isConnected, peerCount, broadcast, sendToPeer } = useWebConnect({
-  topic: 'flowtrack-study-sync',
-  enabled: true // ← Simply change from false to true to enable mesh network
+// Enable in src/App.tsx — line ~48
+const { isConnected, peerCount, broadcast, sendToPeer, ping } = useWebConnect({
+  enabled: true, // ← Change false to true to enable mesh network
+  options: {
+    appName: 'flowtrack',      // Your app identity
+    channelName: 'study-sync'  // Channel name for peer discovery
+  }
 });
 ```
 
-### 📱 Accessible on All Screen Sizes (Mobile Small Screen Usage)
-Earlier, the P2P indicator was restricted to desktop screens. It is now **fully accessible and optimized for small mobile screens**:
-- **Interactive Guide Button:** Look for the **`P2P Guide` / `📶 Peers`** button in the main top header on your mobile phone or desktop.
-- **Click to Inspect:** Tapping this interactive button opens the comprehensive **WebConnect Interactive Guide Modal** directly in your app. It provides real-time connection status, your active mesh topic, step-by-step instructions, and an explanation of the underlying serverless architecture.
+### 📱 Mobile & Small Screen Access
+The P2P status button is **fully accessible on all screen sizes** (mobile phones, tablets, desktops):
+- **Interactive Guide Button:** Look for **`📶 P2P Guide`** or **`📶 X peers`** in the top header.
+- **Tap to Open Guide:** Opens the comprehensive **WebConnect Interactive Guide Modal** with real-time connection status, step-by-step setup instructions, and technical details.
 
-### ⚙️ How Serverless WebConnect Works
-Unlike traditional WebRTC applications that require you to spin up and maintain a dedicated centralized WebSocket signaling server just for peer discovery, FlowTrack uses [webConnect.js](https://webconnect.js.org/). 
-This library completely bypasses centralized backends by utilizing existing decentralized public protocols (**BitTorrent DHT, MQTT, and NOSTR**) for initial peer handshakes. Once discovered, browsers establish encrypted WebRTC mesh data channels directly.
+### ⚙️ How Serverless WebConnect Works (Official Docs)
+Based on [webConnect.js official API](https://webconnect.js.org/#api-connect-to-a-channel):
 
-### ⚠️ Technical Limitations & Guidelines
-When utilizing serverless peer-to-peer syncing across mobile or desktop devices, please keep the following operational limitations in mind:
+1. **No Signaling Server Required** — Unlike traditional WebRTC apps that need a centralized WebSocket server for peer discovery, webConnect.js uses **decentralized public protocols**:
+   - **BitTorrent DHT** (Distributed Hash Table)
+   - **MQTT** (Message Queuing Telemetry Transport brokers)
+   - **NOSTR** (Decentralized relay network)
 
-1. **Active Foreground Tab Required:** WebRTC data channels require browsers to be open and running in the foreground. Mobile operating systems (iOS and Android) proactively freeze network sockets and browser processing when a tab is minimized or sent to the background.
-2. **Symmetric Firewalls & Corporate NATs:** Very strict enterprise, university, or public NATs/firewalls may block direct UDP peer-to-peer communication. If public STUN servers cannot traverse these symmetric NATs, a standard TURN relay server might be necessary.
-3. **Data Channel Message Constraints:** WebRTC data channels are incredibly fast but are best suited for lightweight state synchronization or JSON messaging rather than transferring extremely huge raw binary archives at once.
+2. **Auto Mesh Discovery** — Once peers discover each other via these protocols, browsers establish direct encrypted WebRTC data channels automatically.
+
+3. **Works on Static Hosting** — Your FlowTrack dashboard can run on GitHub Pages, Cloudflare Pages, Netlify, Vercel, or even `localhost` and still sync across devices.
+
+### 📚 Official API Reference
+
+| Method | Description | Official Docs |
+|--------|-------------|---------------|
+| `webconnect(options)` | Initialize with `appName`, `channelName`, etc. | [Connect to Channel](https://webconnect.js.org/#api-connect-to-a-channel) |
+| `onConnect(attr)` | Listen for new peer connections | [Listen on Connect](https://webconnect.js.org/#listen-to-every-new-connection) |
+| `onDisconnect(attr)` | Listen for peer disconnections | [Listen on Disconnect](https://webconnect.js.org/#listen-to-every-disconnection) |
+| `onReceive(data, attr)` | Receive data from peers | [Listen on Receive](https://webconnect.js.org/#listen-to-receiving-data) |
+| `Send(data, {connectId})` | Send to specific peer (or `null` for broadcast) | [Send Data](https://webconnect.js.org/#send-data-to-connection) |
+| `getConnection(callback)` | Get all peer IDs in channel | [Get All Connections](https://webconnect.js.org/#get-all-connection-identity-in-the-channel) |
+| `Ping({connectId})` | Get latency to peer (ms) | [Ping Connection](https://webconnect.js.org/#get-latency-of-connection) |
+| `Disconnect()` | Leave the channel | [Disconnect](https://webconnect.js.org/#disconnect-from-channel) |
+
+### ⚠️ Technical Limitations & Best Practices
+
+1. **Active Foreground Tab Required:** WebRTC data channels require browsers to remain open and active in the foreground. Mobile OS (iOS/Android) freezes network sockets when tabs are minimized or backgrounded.
+
+2. **Strict Firewalls / Corporate NATs:** Very strict enterprise, university, or public NATs/firewalls may block direct UDP peer-to-peer communication. If public STUN servers cannot traverse symmetric NATs, connections may fail.
+
+3. **Lightweight Data Recommended:** WebRTC data channels are optimized for lightweight JSON state sync or small messages. Avoid sending very large binary blobs in a single `Send()` call.
+
+4. **Channel Isolation:** Peers only discover others using the **same `appName` + `channelName`** combination. Use unique channel names for different user groups if needed.
 
 ---
 

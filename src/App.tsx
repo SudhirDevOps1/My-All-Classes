@@ -45,10 +45,13 @@ const App: React.FC = () => {
   const fetchedRef = useRef<Set<string>>(new Set());
   
   // WebConnect P2P sync (optional, disabled by default)
+  // Official API: https://webconnect.js.org/#api-connect-to-a-channel
   const { isConnected: isP2PConnected, peerCount } = useWebConnect({
     enabled: false, // Set to true to enable P2P sync across devices
-    appName: 'FlowTrack',
-    channelName: 'flowtrack-study-sync'
+    options: {
+      appName: 'flowtrack',
+      channelName: 'study-sync'
+    }
   });
 
   // Generate all possible DD-MM-YYYY.json filenames in a date range
