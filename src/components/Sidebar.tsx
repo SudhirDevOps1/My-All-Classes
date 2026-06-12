@@ -97,15 +97,16 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-0.5 sm:space-y-1 pr-1">
                 {availableDates
                   .sort((a, b) => b.getTime() - a.getTime())
-                  .map((date, index) => {
+                  .map((date) => {
                     const isActive = isSameDay(date, currentDate);
                     const label = isToday(date) 
                       ? 'Today' 
                       : format(date, 'EEE, MMM d');
+                    const dateKey = format(date, 'dd-MM-yyyy');
                     
                     return (
                       <button
-                        key={index}
+                        key={dateKey}
                         onClick={() => onDateSelect(date)}
                         className={`
                           w-full flex items-center gap-2.5 sm:gap-3 px-2.5 sm:px-3 py-2 rounded-lg text-sm transition-all

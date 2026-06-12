@@ -13,6 +13,7 @@ import ImportModal from './components/ImportModal';
 import Footer from './components/Footer';
 import AnimatedBackground from './components/AnimatedBackground';
 import { useWebConnect } from './hooks/useWebConnect';
+import WebConnectGuideModal from './components/WebConnectGuideModal';
 import { Menu, X, Download, Loader2, Sparkles, Wifi, WifiOff } from 'lucide-react';
 
 const STORAGE_PREFIX = 'flowtrack_';
@@ -39,12 +40,12 @@ const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showP2PGuide, setShowP2PGuide] = useState(false);
   const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
   const fetchedRef = useRef<Set<string>>(new Set());
   
   // WebConnect P2P sync (optional, disabled by default)
   const { isConnected: isP2PConnected, peerCount } = useWebConnect({
-    topic: 'flowtrack-study-sync',
     enabled: false // Set to true to enable P2P sync across devices
   });
 
@@ -86,13 +87,6 @@ const App: React.FC = () => {
       const key = localStorage.key(i);
       if (key && key.startsWith(STORAGE_PREFIX) && !key.startsWith(CACHE_PREFIX)) {
         registerLocalEntry(key.replace(STORAGE_PREFIX, ''), localStorage.getItem(key));
-      }
-    }
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith(CACHE_PREFIX)) {
-        registerLocalEntry(key.replace(CACHE_PREFIX, ''), localStorage.getItem(key));
       }
     }
 
@@ -145,7 +139,7 @@ const App: React.FC = () => {
       fetchedRef.current.add(dateKey);
 
       try {
-        const response = await fetch(`/data/${filename}`);
+        const response = await fetch(`/data/${filename}`, { cache: 'no-cache' });
         if (response.ok) {
           const data = await response.json() as DayData;
           datesMap[dateKey] = data;
@@ -166,6 +160,14 @@ const App: React.FC = () => {
     for (let i = 0; i < allCandidateFiles.length; i += BATCH_SIZE) {
       const batch = allCandidateFiles.slice(i, i + BATCH_SIZE);
       await Promise.all(batch.map((f, j) => fetchFile(f, i + j)));
+    }
+
+    // ── Step 3.5: Fall back to cached offline fetched data (CACHE_PREFIX) ──
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(CACHE_PREFIX)) {
+        registerLocalEntry(key.replace(CACHE_PREFIX, ''), localStorage.getItem(key));
+      }
     }
 
     // ── Step 4: Merge bundled sample data as the lowest priority ────
@@ -221,31 +223,71 @@ const App: React.FC = () => {
     init();
   }, [autoScanFiles]);
 
-  const loadDataForDate = useCallback((date: Date) => {
-    const filename = formatDateForFile(date);
-    
-    if (loadedDates[filename]) {
-      setDayData(loadedDates[filename]);
-      return;
-    }
-    
-    const stored = localStorage.getItem(STORAGE_PREFIX + filename);
-    if (stored) {
+  const loadDataForDate = useCallback(async (date: Date) => {
+    setLoading(true);
+    const filename = formatDateForFile(date);           // e.g. "12-06-2026" (no .json)
+    const dateKey = filename;                            // e.g. "12-06-2026"
+    const jsonFilename = `${filename}.json`;             // e.g. "12-06-2026.json"
+
+    try {
+      // 1. Always attempt to fetch fresh online data first (Live Server Fetch)
+      //    NOTE: Must use `.json` extension when fetching from /data/
+      const res = await fetch(`/data/${jsonFilename}`, { cache: 'no-cache' });
+      if (res.ok) {
+        const freshData = await res.json() as DayData;
+        setDayData(freshData);
+        setLoadedDates(prev => ({ ...prev, [dateKey]: freshData }));
+        try {
+          localStorage.setItem(CACHE_PREFIX + dateKey, JSON.stringify(freshData));
+        } catch {}
+        setLoading(false);
+        return;
+      }
+    } catch {}
+
+    // 2. Fall back to manual user imports if online fetch failed or 404
+    const userStored = localStorage.getItem(STORAGE_PREFIX + dateKey);
+    if (userStored) {
       try {
-        const data = JSON.parse(stored) as DayData;
+        const data = JSON.parse(userStored) as DayData;
         setDayData(data);
+        setLoading(false);
         return;
       } catch {}
     }
-    
+
+    // 3. Fall back to cached SWR data (already in state from auto-scan)
+    if (loadedDates[dateKey]) {
+      setDayData(loadedDates[dateKey]);
+      setLoading(false);
+      return;
+    }
+
+    // 4. Fall back to cached data in localStorage
+    const cachedStored = localStorage.getItem(CACHE_PREFIX + dateKey);
+    if (cachedStored) {
+      try {
+        const data = JSON.parse(cachedStored) as DayData;
+        setDayData(data);
+        setLoading(false);
+        return;
+      } catch {}
+    }
+
+    // 5. Fall back to bundled samples
+    if (sampleData[dateKey]) {
+      setDayData(sampleData[dateKey]);
+      setLoading(false);
+      return;
+    }
+
     setDayData(null);
+    setLoading(false);
   }, [loadedDates]);
 
   useEffect(() => {
-    if (Object.keys(loadedDates).length > 0) {
-      loadDataForDate(currentDate);
-    }
-  }, [currentDate, loadedDates, loadDataForDate]);
+    loadDataForDate(currentDate);
+  }, [currentDate, loadDataForDate]);
 
   const handlePreviousDay = () => {
     setCurrentDate(prev => getPreviousDay(prev));
@@ -368,20 +410,27 @@ const App: React.FC = () => {
             </nav>
 
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-              {/* P2P Status Indicator */}
-              <div className="hidden lg:flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-white/5 border border-white/[0.08]" title="WebConnect P2P Sync">
+              {/* Clickable P2P Status & Guide Button (Visible on ALL devices) */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowP2PGuide(true)}
+                className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 rounded-lg sm:rounded-xl bg-white/5 hover:bg-white/10 border border-white/[0.08] transition-all cursor-pointer"
+                title="WebConnect P2P Sync & Guide"
+              >
                 {isP2PConnected ? (
                   <>
-                    <Wifi className="w-3.5 h-3.5 text-green-400" />
-                    <span className="text-[10px] text-gray-400">{peerCount} peers</span>
+                    <Wifi className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 animate-pulse" />
+                    <span className="text-[10px] sm:text-xs text-gray-300 font-medium">{peerCount}</span>
+                    <span className="text-[10px] sm:text-xs text-gray-400 hidden sm:inline">peers</span>
                   </>
                 ) : (
                   <>
-                    <WifiOff className="w-3.5 h-3.5 text-gray-500" />
-                    <span className="text-[10px] text-gray-500">P2P</span>
+                    <WifiOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 hover:text-gray-400 transition-colors" />
+                    <span className="text-[10px] sm:text-xs text-gray-400 font-medium">P2P Guide</span>
                   </>
                 )}
-              </div>
+              </motion.button>
               
               {dayData && (
                 <motion.button
@@ -602,6 +651,14 @@ const App: React.FC = () => {
           onImport={handleImport}
         />
       )}
+
+      {/* WebConnect P2P Interactive Guide Modal */}
+      <WebConnectGuideModal
+        isOpen={showP2PGuide}
+        onClose={() => setShowP2PGuide(false)}
+        isConnected={isP2PConnected}
+        peerCount={peerCount}
+      />
     </div>
   );
 };

@@ -276,30 +276,33 @@ The production build outputs a **single self-contained `dist/index.html`** (via 
 
 ---
 
-## 🌐 WebConnect P2P Sync
+## 🌐 WebConnect P2P Serverless Sync & Mobile Usage
 
-FlowTrack includes optional **WebConnect** integration for serverless peer-to-peer synchronization:
+FlowTrack includes built-in **WebConnect** integration for true serverless multi-device peer-to-peer synchronization:
 
 ```typescript
-// Enable P2P sync in App.tsx
+// How to Enable in src/App.tsx
 const { isConnected, peerCount, broadcast, sendToPeer } = useWebConnect({
   topic: 'flowtrack-study-sync',
-  enabled: true // Set to true to enable
+  enabled: true // ← Simply change from false to true to enable mesh network
 });
 ```
 
-**How it works:**
-- Uses [webConnect.js](https://webconnect.js.org/) library
-- Establishes WebRTC mesh connections **without any signaling server**
-- Leverages public protocols (Torrent, MQTT, NOSTR) for peer discovery
-- Works on static hosting (GitHub Pages, Cloudflare Pages, Netlify, etc.)
+### 📱 Accessible on All Screen Sizes (Mobile Small Screen Usage)
+Earlier, the P2P indicator was restricted to desktop screens. It is now **fully accessible and optimized for small mobile screens**:
+- **Interactive Guide Button:** Look for the **`P2P Guide` / `📶 Peers`** button in the main top header on your mobile phone or desktop.
+- **Click to Inspect:** Tapping this interactive button opens the comprehensive **WebConnect Interactive Guide Modal** directly in your app. It provides real-time connection status, your active mesh topic, step-by-step instructions, and an explanation of the underlying serverless architecture.
 
-**Use cases:**
-- Sync study data across multiple devices in real-time
-- Collaborative study sessions with peers
-- Offline-first architecture with automatic peer sync
+### ⚙️ How Serverless WebConnect Works
+Unlike traditional WebRTC applications that require you to spin up and maintain a dedicated centralized WebSocket signaling server just for peer discovery, FlowTrack uses [webConnect.js](https://webconnect.js.org/). 
+This library completely bypasses centralized backends by utilizing existing decentralized public protocols (**BitTorrent DHT, MQTT, and NOSTR**) for initial peer handshakes. Once discovered, browsers establish encrypted WebRTC mesh data channels directly.
 
-**Status indicator:** Look for the 📶 P2P icon in the header (green = connected, gray = offline).
+### ⚠️ Technical Limitations & Guidelines
+When utilizing serverless peer-to-peer syncing across mobile or desktop devices, please keep the following operational limitations in mind:
+
+1. **Active Foreground Tab Required:** WebRTC data channels require browsers to be open and running in the foreground. Mobile operating systems (iOS and Android) proactively freeze network sockets and browser processing when a tab is minimized or sent to the background.
+2. **Symmetric Firewalls & Corporate NATs:** Very strict enterprise, university, or public NATs/firewalls may block direct UDP peer-to-peer communication. If public STUN servers cannot traverse these symmetric NATs, a standard TURN relay server might be necessary.
+3. **Data Channel Message Constraints:** WebRTC data channels are incredibly fast but are best suited for lightweight state synchronization or JSON messaging rather than transferring extremely huge raw binary archives at once.
 
 ---
 

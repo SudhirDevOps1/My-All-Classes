@@ -1,18 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 
-interface WebConnectInstance {
-  onConnect: (callback: (attr: any) => void) => void;
-  onDisconnect: (callback: (attr: any) => void) => void;
-  onReceive: (callback: (data: any, attr: any) => void) => void;
-  Send: (event: string, data: any) => void;
-  Ping: (attr: any) => Promise<any>;
-  getConnection: (callback: (attr: any) => void) => void;
-  // disconnect method may not exist in all versions
-  disconnect?: () => void;
-}
-
 interface UseWebConnectOptions {
-  topic?: string;
   enabled?: boolean;
   onMessage?: (data: any, peer: any) => void;
   onPeerConnect?: (peer: any) => void;
@@ -29,29 +17,53 @@ interface UseWebConnectReturn {
   error: string | null;
 }
 
+// Dynamic CDN import — the published npm package has NO built dist files
+// Docs: https://webconnect.js.org/
+const WEBCONNECT_CDN =
+  'https://cdn.jsdelivr.net/npm/webconnect/dist/esm/webconnect.js';
+
+async function loadWebConnect(): Promise<any> {
+  // Dynamic script injection for the ESM module from CDN
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.textContent = `
+      import webconnect from '${WEBCONNECT_CDN}';
+      window.__webconnect_module = webconnect;
+    `;
+    script.onerror = () => reject(new Error('Failed to load webConnect CDN'));
+    document.head.appendChild(script);
+
+    // Poll for the module to load
+    const timeout = setTimeout(() => reject(new Error('webConnect load timeout')), 10000);
+    const check = setInterval(() => {
+      if ((window as any).__webconnect_module) {
+        clearInterval(check);
+        clearTimeout(timeout);
+        const mod = (window as any).__webconnect_module;
+        delete (window as any).__webconnect_module;
+        resolve(mod);
+      }
+    }, 200);
+  });
+}
+
 /**
- * WebConnect Hook - Serverless P2P synchronization
- * 
- * Uses webConnect.js library to establish WebRTC mesh peer-to-peer connections
- * without any signaling server. Leverages public protocols (Torrent, MQTT, NOSTR)
- * for automatic peer discovery.
- * 
- * Perfect for:
- * - Syncing study data across devices
- * - Real-time collaboration without backend
- * - Static hosting (GitHub Pages, Cloudflare Pages, Netlify, etc.)
+ * WebConnect Hook — Serverless P2P synchronization.
+ *
+ * Uses webConnect.js to establish WebRTC mesh connections
+ * WITHOUT any signaling server. Uses BitTorrent DHT, MQTT, NOSTR
+ * for automatic peer discovery. Works on static hosting.
+ *
+ * NOTE: Disabled by default (enabled=false). Set enabled=true to activate.
  */
 export const useWebConnect = (options: UseWebConnectOptions = {}): UseWebConnectReturn => {
-  const {
-    topic = 'flowtrack-sync',
-    enabled = false,
-    onMessage,
-    onPeerConnect
-  } = options;
+  const { enabled = false, onMessage, onPeerConnect } = options;
 
-  const connectRef = useRef<WebConnectInstance | null>(null);
+  const connectRef = useRef<any>(null);
   const isConnectedRef = useRef(false);
   const peersRef = useRef<any[]>([]);
+  const mountedRef = useRef(true);
 
   const [isConnected, setIsConnected] = useState(false);
   const [peerCount, setPeerCount] = useState(0);
@@ -61,58 +73,48 @@ export const useWebConnect = (options: UseWebConnectOptions = {}): UseWebConnect
   const connect = useCallback(() => {
     if (!enabled || connectRef.current) return;
 
-    try {
-      // Dynamic import to avoid SSR issues
-      import('webconnect').then(({ default: webconnect }) => {
-        const connectInstance = webconnect({ topic });
+    loadWebConnect()
+      .then((webconnect: any) => {
+        if (!mountedRef.current) return;
+        const instance = webconnect();
 
-        connectInstance.onConnect((attr: any) => {
-          console.log('[WebConnect] Connected:', attr);
+        instance.onConnect(() => {
+          if (!mountedRef.current) return;
           isConnectedRef.current = true;
           setIsConnected(true);
           setError(null);
         });
 
-        connectInstance.onDisconnect((attr: any) => {
-          console.log('[WebConnect] Disconnected:', attr);
+        instance.onDisconnect(() => {
+          if (!mountedRef.current) return;
           isConnectedRef.current = false;
           setIsConnected(false);
         });
 
-        connectInstance.onReceive((data: any, attr: any) => {
-          console.log('[WebConnect] Received:', data, attr);
-          if (onMessage) {
-            onMessage(data, attr);
-          }
+        instance.onReceive((data: any, attr: any) => {
+          if (!mountedRef.current) return;
+          if (onMessage) onMessage(data, attr);
         });
 
-        connectInstance.getConnection((attr: any) => {
-          console.log('[WebConnect] Peer connection:', attr);
-          if (!peersRef.current.find(p => p.connectId === attr.connectId)) {
+        instance.getConnection((attr: any) => {
+          if (!mountedRef.current) return;
+          if (!peersRef.current.find((p: any) => p.connectId === attr.connectId)) {
             peersRef.current.push(attr);
             setPeers([...peersRef.current]);
             setPeerCount(peersRef.current.length);
-            if (onPeerConnect) {
-              onPeerConnect(attr);
-            }
+            if (onPeerConnect) onPeerConnect(attr);
           }
         });
 
-        connectRef.current = connectInstance;
-      }).catch((err: any) => {
-        console.error('[WebConnect] Failed to load:', err);
-        setError('Failed to load WebConnect library');
+        connectRef.current = instance;
+      })
+      .catch((err: any) => {
+        console.error('[WebConnect] Failed:', err);
+        if (mountedRef.current) setError('Failed to load webConnect from CDN');
       });
-    } catch (err: any) {
-      console.error('[WebConnect] Connection error:', err);
-      setError('Connection failed');
-    }
-  }, [enabled, onMessage, onPeerConnect, topic]);
+  }, [enabled, onMessage, onPeerConnect]);
 
-  const disconnect = useCallback(() => {
-    if (connectRef.current && connectRef.current.disconnect) {
-      connectRef.current.disconnect();
-    }
+  const disconnectFn = useCallback(() => {
     connectRef.current = null;
     isConnectedRef.current = false;
     setIsConnected(false);
@@ -134,24 +136,15 @@ export const useWebConnect = (options: UseWebConnectOptions = {}): UseWebConnect
   }, []);
 
   useEffect(() => {
-    if (enabled) {
-      connect();
-    }
+    mountedRef.current = true;
+    if (enabled) connect();
     return () => {
-      disconnect();
+      mountedRef.current = false;
+      disconnectFn();
     };
-  }, [enabled, connect, disconnect]);
+  }, [enabled, connect, disconnectFn]);
 
-  return {
-    isConnected,
-    peerCount,
-    peers,
-    broadcast,
-    sendToPeer,
-    connect,
-    disconnect,
-    error
-  };
+  return { isConnected, peerCount, peers, broadcast, sendToPeer, connect, disconnect: disconnectFn, error };
 };
 
 export default useWebConnect;

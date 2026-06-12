@@ -16,8 +16,7 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "recharts": "^3.8.1",
-    "tailwind-merge": "3.4.0",
-    "webconnect": "^0.0.12"
+    "tailwind-merge": "3.4.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.17",
