@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+/* ── Base: lock the dark background on html & body so scroll never shows white ── */
+html {
+  background-color: #0a0514;
+  color-scheme: dark;
+}
+
+body {
+  background-color: #0a0514;
+  min-height: 100%;
+}
+
+/* ── Persistent full-page gradient behind everything ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, #020010 0%, #150a2e 35%, #0d0b1e 65%, #020010 100%);
+  pointer-events: none;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

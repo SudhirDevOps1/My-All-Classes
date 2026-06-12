@@ -408,7 +408,7 @@ const App: React.FC = () => {
   const isEmpty = !dayData || dayData.sessions.length === 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'transparent' }}>
       <AnimatedBackground />
 
       <header className="relative z-10 bg-slate-900/60 backdrop-blur-2xl border-b border-white/[0.08] sticky top-0">

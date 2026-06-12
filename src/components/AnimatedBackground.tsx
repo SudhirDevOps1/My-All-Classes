@@ -3,7 +3,18 @@ import { motion } from 'framer-motion';
 
 const AnimatedBackground: React.FC = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: -1 }}>
+      {/* ── Solid dark base — prevents any white flash on scroll ── */}
+      <div className="absolute inset-0 bg-[#0a0514]" />
+      
+      {/* ── Base gradient layer, always covers full viewport ── */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(135deg, #020010 0%, #150a2e 40%, #0d0b1e 70%, #020010 100%)',
+        }}
+      />
+
       {/* Gradient orbs */}
       <motion.div
         className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px]"
