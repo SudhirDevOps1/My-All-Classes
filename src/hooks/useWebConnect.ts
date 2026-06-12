@@ -2,49 +2,44 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 
 interface UseWebConnectOptions {
   enabled?: boolean;
-  onMessage?: (data: any, peer: any) => void;
-  onPeerConnect?: (peer: any) => void;
+  appName?: string;
+  channelName?: string;
+  onMessage?: (data: any, peerId: string) => void;
+  onPeerConnect?: (peerId: string) => void;
+  onPeerDisconnect?: (peerId: string) => void;
 }
 
 interface UseWebConnectReturn {
   isConnected: boolean;
   peerCount: number;
-  peers: any[];
+  peers: string[];
+  myId: string | null;
   broadcast: (data: any) => void;
   sendToPeer: (peerId: string, data: any) => void;
+  pingPeer: (peerId: string) => Promise<number | null>;
   connect: () => void;
   disconnect: () => void;
   error: string | null;
 }
 
-// Dynamic CDN import — the published npm package has NO built dist files
-// Docs: https://webconnect.js.org/
-const WEBCONNECT_CDN =
-  'https://cdn.jsdelivr.net/npm/webconnect/dist/esm/webconnect.js';
+// Official webConnect.js CDN (UMD — works everywhere)
+const WEBCONNECT_CDN = 'https://cdn.jsdelivr.net/npm/webconnect/dist/umd/webconnect.js';
 
-async function loadWebConnect(): Promise<any> {
-  // Dynamic script injection for the ESM module from CDN
+// Load webconnect via dynamic script injection
+function loadWebConnectScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.textContent = `
-      import webconnect from '${WEBCONNECT_CDN}';
-      window.__webconnect_module = webconnect;
-    `;
-    script.onerror = () => reject(new Error('Failed to load webConnect CDN'));
-    document.head.appendChild(script);
+    // Already loaded?
+    if ((window as any).webconnect) {
+      resolve();
+      return;
+    }
 
-    // Poll for the module to load
-    const timeout = setTimeout(() => reject(new Error('webConnect load timeout')), 10000);
-    const check = setInterval(() => {
-      if ((window as any).__webconnect_module) {
-        clearInterval(check);
-        clearTimeout(timeout);
-        const mod = (window as any).__webconnect_module;
-        delete (window as any).__webconnect_module;
-        resolve(mod);
-      }
-    }, 200);
+    const script = document.createElement('script');
+    script.src = WEBCONNECT_CDN;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load webconnect.js from CDN'));
+    document.head.appendChild(script);
   });
 }
 
@@ -53,85 +48,136 @@ async function loadWebConnect(): Promise<any> {
  *
  * Uses webConnect.js to establish WebRTC mesh connections
  * WITHOUT any signaling server. Uses BitTorrent DHT, MQTT, NOSTR
- * for automatic peer discovery. Works on static hosting.
+ * for automatic peer discovery.
+ *
+ * Official API: https://webconnect.js.org/
  *
  * NOTE: Disabled by default (enabled=false). Set enabled=true to activate.
  */
 export const useWebConnect = (options: UseWebConnectOptions = {}): UseWebConnectReturn => {
-  const { enabled = false, onMessage, onPeerConnect } = options;
+  const {
+    enabled = false,
+    appName = 'FlowTrack',
+    channelName = 'flowtrack-study-sync',
+    onMessage,
+    onPeerConnect,
+    onPeerDisconnect
+  } = options;
 
-  const connectRef = useRef<any>(null);
-  const isConnectedRef = useRef(false);
-  const peersRef = useRef<any[]>([]);
+  const instanceRef = useRef<any>(null);
+  const peersRef = useRef<Set<string>>(new Set());
   const mountedRef = useRef(true);
 
   const [isConnected, setIsConnected] = useState(false);
   const [peerCount, setPeerCount] = useState(0);
-  const [peers, setPeers] = useState<any[]>([]);
+  const [peers, setPeers] = useState<string[]>([]);
+  const [myId, setMyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const updatePeers = useCallback(() => {
+    const list = Array.from(peersRef.current);
+    setPeers(list);
+    setPeerCount(list.length);
+  }, []);
+
   const connect = useCallback(() => {
-    if (!enabled || connectRef.current) return;
+    if (!enabled || instanceRef.current) return;
 
-    loadWebConnect()
-      .then((webconnect: any) => {
+    loadWebConnectScript()
+      .then(() => {
         if (!mountedRef.current) return;
-        const instance = webconnect();
 
-        instance.onConnect(() => {
+        const wc = (window as any).webconnect;
+        if (!wc) {
+          setError('webconnect.js not available on window');
+          return;
+        }
+
+        // Initialize with appName + channelName per official API
+        const instance = wc({ appName, channelName });
+
+        // Get my own connection ID
+        instance.getMyId((attr: { connectId: string }) => {
+          if (mountedRef.current) setMyId(attr.connectId);
+        });
+
+        // Listen for new peer connections
+        instance.onConnect((attr: { connectId: string }) => {
           if (!mountedRef.current) return;
-          isConnectedRef.current = true;
+          const id = attr.connectId;
+          if (!peersRef.current.has(id)) {
+            peersRef.current.add(id);
+            updatePeers();
+            if (onPeerConnect) onPeerConnect(id);
+          }
           setIsConnected(true);
           setError(null);
         });
 
-        instance.onDisconnect(() => {
+        // Listen for peer disconnections
+        instance.onDisconnect((attr: { connectId: string }) => {
           if (!mountedRef.current) return;
-          isConnectedRef.current = false;
-          setIsConnected(false);
+          const id = attr.connectId;
+          peersRef.current.delete(id);
+          updatePeers();
+          if (onPeerDisconnect) onPeerDisconnect(id);
+          if (peersRef.current.size === 0) setIsConnected(false);
         });
 
-        instance.onReceive((data: any, attr: any) => {
+        // Listen for incoming data
+        instance.onReceive((data: any, attr: { connectId: string; metadata?: any }) => {
           if (!mountedRef.current) return;
-          if (onMessage) onMessage(data, attr);
+          if (onMessage) onMessage(data, attr.connectId);
         });
 
-        instance.getConnection((attr: any) => {
+        // Get existing connections in the channel
+        instance.getConnection((attr: { connection: string[] }) => {
           if (!mountedRef.current) return;
-          if (!peersRef.current.find((p: any) => p.connectId === attr.connectId)) {
-            peersRef.current.push(attr);
-            setPeers([...peersRef.current]);
-            setPeerCount(peersRef.current.length);
-            if (onPeerConnect) onPeerConnect(attr);
+          if (Array.isArray(attr.connection)) {
+            attr.connection.forEach((id: string) => peersRef.current.add(id));
+            updatePeers();
           }
         });
 
-        connectRef.current = instance;
+        instanceRef.current = instance;
       })
       .catch((err: any) => {
-        console.error('[WebConnect] Failed:', err);
-        if (mountedRef.current) setError('Failed to load webConnect from CDN');
+        console.error('[WebConnect] Load failed:', err);
+        if (mountedRef.current) setError('Failed to load webconnect.js from CDN');
       });
-  }, [enabled, onMessage, onPeerConnect]);
+  }, [enabled, appName, channelName, onMessage, onPeerConnect, onPeerDisconnect, updatePeers]);
 
   const disconnectFn = useCallback(() => {
-    connectRef.current = null;
-    isConnectedRef.current = false;
+    if (instanceRef.current && instanceRef.current.Disconnect) {
+      instanceRef.current.Disconnect(); // NOTE: capital D per official API
+    }
+    instanceRef.current = null;
+    peersRef.current.clear();
     setIsConnected(false);
-    peersRef.current = [];
     setPeers([]);
     setPeerCount(0);
+    setMyId(null);
   }, []);
 
   const broadcast = useCallback((data: any) => {
-    if (connectRef.current && isConnectedRef.current) {
-      connectRef.current.Send('sync-data', data);
+    if (instanceRef.current) {
+      // connectId: null = broadcast to ALL peers in channel
+      instanceRef.current.Send(data, { connectId: null });
     }
   }, []);
 
   const sendToPeer = useCallback((peerId: string, data: any) => {
-    if (connectRef.current && isConnectedRef.current) {
-      connectRef.current.Send('peer-data', { ...data, targetPeerId: peerId });
+    if (instanceRef.current) {
+      instanceRef.current.Send(data, { connectId: peerId });
+    }
+  }, []);
+
+  const pingPeer = useCallback(async (peerId: string): Promise<number | null> => {
+    if (!instanceRef.current) return null;
+    try {
+      return await instanceRef.current.Ping({ connectId: peerId });
+    } catch {
+      return null;
     }
   }, []);
 
@@ -144,7 +190,18 @@ export const useWebConnect = (options: UseWebConnectOptions = {}): UseWebConnect
     };
   }, [enabled, connect, disconnectFn]);
 
-  return { isConnected, peerCount, peers, broadcast, sendToPeer, connect, disconnect: disconnectFn, error };
+  return {
+    isConnected,
+    peerCount,
+    peers,
+    myId,
+    broadcast,
+    sendToPeer,
+    pingPeer,
+    connect,
+    disconnect: disconnectFn,
+    error
+  };
 };
 
 export default useWebConnect;
