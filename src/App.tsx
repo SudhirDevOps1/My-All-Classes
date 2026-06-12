@@ -12,7 +12,8 @@ import Sidebar from './components/Sidebar';
 import ImportModal from './components/ImportModal';
 import Footer from './components/Footer';
 import AnimatedBackground from './components/AnimatedBackground';
-import { Menu, X, Download, Loader2, Sparkles } from 'lucide-react';
+import { useWebConnect } from './hooks/useWebConnect';
+import { Menu, X, Download, Loader2, Sparkles, Wifi, WifiOff } from 'lucide-react';
 
 const STORAGE_PREFIX = 'flowtrack_';
 const CACHE_PREFIX = 'flowtrack_cache_';
@@ -40,6 +41,26 @@ const App: React.FC = () => {
   const [showImport, setShowImport] = useState(false);
   const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
   const fetchedRef = useRef<Set<string>>(new Set());
+  
+  // WebConnect P2P sync (optional, disabled by default)
+  const { isConnected: isP2PConnected, peerCount } = useWebConnect({
+    topic: 'flowtrack-study-sync',
+    enabled: false // Set to true to enable P2P sync across devices
+  });
+
+  // Generate all possible DD-MM-YYYY.json filenames in a date range
+  const generateDateRange = useCallback((fromDate: Date, toDate: Date): string[] => {
+    const result: string[] = [];
+    const d = new Date(fromDate);
+    while (d <= toDate) {
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      result.push(`${dd}-${mm}-${yyyy}.json`);
+      d.setDate(d.getDate() + 1);
+    }
+    return result;
+  }, []);
 
   const autoScanFiles = useCallback(async () => {
     setScanning(true);
@@ -47,22 +68,7 @@ const App: React.FC = () => {
     const dates: Date[] = [];
     const dateStrings = new Set<string>();
 
-    let filesToScan: string[] = [];
-    try {
-      const manifestRes = await fetch(MANIFEST_URL);
-      if (manifestRes.ok) {
-        const manifest = await manifestRes.json();
-        if (Array.isArray(manifest.files)) {
-          filesToScan = manifest.files;
-        }
-      }
-    } catch {
-      filesToScan = availableDataFiles;
-    }
-
-    const localStorageDates: string[] = [];
-
-    // Helper to register a date entry from localStorage
+    // ── Step 1: Load localStorage data immediately ──────────────────
     const registerLocalEntry = (dateKey: string, raw: string | null) => {
       if (!raw || dateStrings.has(dateKey)) return;
       try {
@@ -72,13 +78,10 @@ const App: React.FC = () => {
           datesMap[dateKey] = data;
           dates.push(new Date(year, month - 1, day));
           dateStrings.add(dateKey);
-          localStorageDates.push(`${dateKey}.json`);
         }
       } catch {}
     };
 
-    // Pass 1: user-imported data (STORAGE_PREFIX) takes priority.
-    // Note: CACHE_PREFIX keys also start with STORAGE_PREFIX, so exclude them.
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(STORAGE_PREFIX) && !key.startsWith(CACHE_PREFIX)) {
@@ -86,7 +89,6 @@ const App: React.FC = () => {
       }
     }
 
-    // Pass 2: cached fetched data (CACHE_PREFIX) fills in remaining dates.
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key?.startsWith(CACHE_PREFIX)) {
@@ -94,61 +96,79 @@ const App: React.FC = () => {
       }
     }
 
-    const allFiles = [...new Set([...filesToScan, ...localStorageDates])];
-    setScanProgress({ current: 0, total: allFiles.length });
+    // ── Step 2: Build list of candidate filenames to scan ───────────
+    // Merge: manifest list + fallback list + auto-generated date range (90 days back → 14 days forward)
+    let manifestFiles: string[] = [];
+    try {
+      const manifestRes = await fetch(MANIFEST_URL);
+      if (manifestRes.ok) {
+        const manifest = await manifestRes.json();
+        if (Array.isArray(manifest.files)) {
+          manifestFiles = manifest.files;
+        }
+      }
+    } catch {}
 
-    const scanPromises = allFiles.map(async (filename, idx) => {
+    const today = new Date();
+    const past = new Date(today);
+    past.setDate(past.getDate() - 90);
+    const future = new Date(today);
+    future.setDate(future.getDate() + 14);
+    const autoScannedFiles = generateDateRange(past, future);
+
+    // Deduplicate, then append any localStorage-only dates not yet in the list
+    const allCandidateFiles = [...new Set([
+      ...manifestFiles,
+      ...availableDataFiles,
+      ...autoScannedFiles,
+    ])];
+
+    // ── Step 3: Fetch every candidate in parallel (batches of 20) ──
+    const BATCH_SIZE = 20;
+    setScanProgress({ current: 0, total: allCandidateFiles.length });
+
+    const fetchFile = async (filename: string, idx: number) => {
+      const dateKey = filename.replace('.json', '');
+
+      // Skip dates already loaded from localStorage
+      if (datesMap[dateKey]) {
+        setScanProgress(prev => ({ ...prev, current: idx + 1 }));
+        return;
+      }
+
+      // Skip if already fetched in this session (cache hit)
+      if (fetchedRef.current.has(dateKey)) {
+        setScanProgress(prev => ({ ...prev, current: idx + 1 }));
+        return;
+      }
+
+      fetchedRef.current.add(dateKey);
+
       try {
-        const dateKey = filename.replace('.json', '');
-        
-        if (datesMap[dateKey]) {
-          setScanProgress({ current: idx + 1, total: allFiles.length });
-          return;
-        }
-
-        if (fetchedRef.current.has(dateKey)) {
-          const cached = localStorage.getItem(CACHE_PREFIX + dateKey);
-          if (cached) {
-            try {
-              const data = JSON.parse(cached) as DayData;
-              datesMap[dateKey] = data;
-              const [day, month, year] = dateKey.split('-').map(Number);
-              if (day && month && year) {
-                dates.push(new Date(year, month - 1, day));
-                dateStrings.add(dateKey);
-              }
-            } catch {}
-          }
-          setScanProgress({ current: idx + 1, total: allFiles.length });
-          return;
-        }
-
-        fetchedRef.current.add(dateKey);
-
-        const url = `/data/${filename}`;
-        const response = await fetch(url);
-        
+        const response = await fetch(`/data/${filename}`);
         if (response.ok) {
           const data = await response.json() as DayData;
           datesMap[dateKey] = data;
-          
           try {
             localStorage.setItem(CACHE_PREFIX + dateKey, JSON.stringify(data));
           } catch {}
-          
           const [day, month, year] = dateKey.split('-').map(Number);
           if (day && month && year) {
-            const date = new Date(year, month - 1, day);
-            dates.push(date);
+            dates.push(new Date(year, month - 1, day));
             dateStrings.add(dateKey);
           }
         }
-      } catch (err) {}
-      setScanProgress({ current: idx + 1, total: allFiles.length });
-    });
+      } catch {}
+      setScanProgress(prev => ({ ...prev, current: idx + 1 }));
+    };
 
-    await Promise.all(scanPromises);
+    // Run fetches in batches of 20 to avoid overwhelming the browser
+    for (let i = 0; i < allCandidateFiles.length; i += BATCH_SIZE) {
+      const batch = allCandidateFiles.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map((f, j) => fetchFile(f, i + j)));
+    }
 
+    // ── Step 4: Merge bundled sample data as the lowest priority ────
     Object.keys(sampleData).forEach(key => {
       if (!datesMap[key]) {
         datesMap[key] = sampleData[key];
@@ -164,9 +184,9 @@ const App: React.FC = () => {
     setAvailableDates(sortedDates);
     setLoadedDates(datesMap);
     setScanning(false);
-    
+
     return { datesMap, sortedDates };
-  }, []);
+  }, [generateDateRange]);
 
   useEffect(() => {
     const init = async () => {
@@ -348,6 +368,21 @@ const App: React.FC = () => {
             </nav>
 
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              {/* P2P Status Indicator */}
+              <div className="hidden lg:flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-white/5 border border-white/[0.08]" title="WebConnect P2P Sync">
+                {isP2PConnected ? (
+                  <>
+                    <Wifi className="w-3.5 h-3.5 text-green-400" />
+                    <span className="text-[10px] text-gray-400">{peerCount} peers</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="w-3.5 h-3.5 text-gray-500" />
+                    <span className="text-[10px] text-gray-500">P2P</span>
+                  </>
+                )}
+              </div>
+              
               {dayData && (
                 <motion.button
                   whileHover={{ scale: 1.1 }}

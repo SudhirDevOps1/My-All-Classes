@@ -23,6 +23,7 @@
 - [Getting Started](#-getting-started)
 - [Views & Screens](#-views--screens)
 - [Tech Stack](#-tech-stack)
+- [WebConnect P2P Sync](#-webconnect-p2p-sync)
 - [Design Philosophy](#-design-philosophy)
 - [Author](#-author)
 - [License](#-license)
@@ -55,6 +56,7 @@ The data displayed here is the **source of truth** exported by the tracker app. 
 | 📥 **Import JSON** | Drag-and-drop or paste a FlowTrack export to view it instantly (persisted in `localStorage`, source files untouched) |
 | 📤 **Export JSON** | Download the currently displayed day's data as `DD-MM-YYYY.json` |
 | 🔄 **Rescan** | One-click cache clear + fresh re-scan of the data directory |
+| 🌐 **WebConnect P2P** | Optional peer-to-peer sync across devices (no signaling server needed) |
 | 🎨 **Premium UI/UX** | Glassmorphism, animated gradient orbs, floating particles, and Framer Motion micro-interactions throughout |
 | 📱 **Fully Responsive** | Mobile-first design that scales gracefully from phones to ultra-wide desktops |
 | 🔒 **Privacy-First** | 100% client-side — no servers, no telemetry, no tracking |
@@ -149,26 +151,15 @@ Each daily file follows the official FlowTrack export schema:
 ## ➕ Adding Daily Data
 
 1. **Export** your day's JSON from the [Ultimate Master Study Tracker](https://the-ultimate-master-study-tracker.vercel.app/).
-2. **Name it by date** — both naming styles are supported:
+2. **Name it by date** — supported formats:
    - `12-06-2026.json` *(DD-MM-YYYY — recommended)*
    - `12/06/2026.json` *(DD/MM/YYYY)*
 3. **Place it** in `public/data/`.
-4. **Register it** in `public/data/file-manifest.json`:
+4. **Done!** The app auto-discovers it — no manifest editing needed.
 
-```json
-{
-  "files": [
-    "11-06-2026.json",
-    "12-06-2026.json",
-    "13-06-2026.json",
-    "14-06-2026.json",
-    "15-06-2026.json"
-  ],
-  "generatedAt": "2026-06-15T00:00:00.000Z"
-}
-```
+> 🔄 **How auto-scan works:** On load, the app scans **90 days back + 14 days forward** from today (104 candidate dates). It tries fetching `DD-MM-YYYY.json` for each date in parallel batches of 20. Existing files load instantly, missing ones fail silently. Results are cached in `localStorage` for offline use.
 
-5. Reload the app (or hit the **Rescan** button) — your new day appears in the sidebar automatically.
+> 💡 **Optional manifest:** If you want faster loading, you can optionally maintain `public/data/file-manifest.json` — the app reads it first as a fast path. But it is **not required** anymore.
 
 > 💡 **No file access?** Use the **Import** button instead — drag-and-drop or paste your JSON and it persists in your browser's `localStorage`.
 
@@ -282,6 +273,33 @@ The production build outputs a **single self-contained `dist/index.html`** (via 
 | **Charts** | [Recharts](https://recharts.org/) |
 | **Dates** | [date-fns](https://date-fns.org/) |
 | **Icons** | [Lucide React](https://lucide.dev/) |
+
+---
+
+## 🌐 WebConnect P2P Sync
+
+FlowTrack includes optional **WebConnect** integration for serverless peer-to-peer synchronization:
+
+```typescript
+// Enable P2P sync in App.tsx
+const { isConnected, peerCount, broadcast, sendToPeer } = useWebConnect({
+  topic: 'flowtrack-study-sync',
+  enabled: true // Set to true to enable
+});
+```
+
+**How it works:**
+- Uses [webConnect.js](https://webconnect.js.org/) library
+- Establishes WebRTC mesh connections **without any signaling server**
+- Leverages public protocols (Torrent, MQTT, NOSTR) for peer discovery
+- Works on static hosting (GitHub Pages, Cloudflare Pages, Netlify, etc.)
+
+**Use cases:**
+- Sync study data across multiple devices in real-time
+- Collaborative study sessions with peers
+- Offline-first architecture with automatic peer sync
+
+**Status indicator:** Look for the 📶 P2P icon in the header (green = connected, gray = offline).
 
 ---
 
