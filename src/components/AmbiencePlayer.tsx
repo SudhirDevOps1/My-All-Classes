@@ -194,7 +194,7 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
           dragListener={false}
           dragMomentum={false}
           dragConstraints={bounds}
-          className="fixed bottom-6 right-6 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-2xl z-[9999] w-[380px] max-w-[90vw] backdrop-blur-xl"
+          className="fixed bottom-2 right-2 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-2xl z-[9999] w-[380px] max-w-[90vw] backdrop-blur-xl"
         >
           <div 
             className="flex items-center justify-between p-1.5 px-2.5 cursor-move hover:bg-white/5 rounded-t-xl transition-colors"
