@@ -19,10 +19,10 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
     const updateBounds = () => {
       if (typeof window !== 'undefined') {
         setBounds({
-          top: -60, // Allow slight drag up over header
-          left: -(window.innerWidth - 380), // Prevent going off-screen left
-          right: 20, // Allow slight drag right
-          bottom: window.innerHeight - 340 // Allow drag down to bottom
+          top: -(window.innerHeight - 340),
+          left: -(window.innerWidth - 400),
+          right: 20,
+          bottom: 60
         });
       }
     };
@@ -199,7 +199,7 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
           dragListener={false}
           dragMomentum={false}
           dragConstraints={bounds}
-          className="fixed top-20 right-4 md:top-24 md:right-8 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-2xl z-[9999] w-[380px] max-w-[90vw] backdrop-blur-xl"
+          className="fixed bottom-16 right-4 sm:bottom-8 sm:right-6 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-2xl z-[9999] w-[340px] sm:w-[380px] max-w-[90vw] backdrop-blur-xl"
         >
           <div 
             className="flex items-center justify-between p-1.5 px-2.5 cursor-move hover:bg-white/5 rounded-t-xl transition-colors touch-none"
