@@ -328,10 +328,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, streak, userProfile }) => {
         variants={itemVariants}
         className="bg-slate-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.08] p-4 sm:p-6"
       >
-        <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="text-lg">📄</span>
-          Data Export Details
-        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-white/5 rounded-xl p-4 border border-white/5">
             <div className="text-xs text-gray-500 mb-1">Source App</div>
@@ -345,19 +341,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, streak, userProfile }) => {
           </div>
         </div>
         
-        {data.settings && data.settings.length > 0 && (
-          <div className="mt-4">
-            <div className="text-xs text-gray-500 mb-2">Raw Settings Configuration</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              {data.settings.map((setting, idx) => (
-                <div key={idx} className="bg-white/5 rounded-lg p-2.5 border border-white/5 flex flex-col gap-1 overflow-hidden">
-                  <span className="text-[10px] text-gray-400 font-mono truncate">{setting.key}</span>
-                  <span className="text-xs text-white truncate" title={setting.value}>{setting.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
       </motion.div>
 
       {/* Session Detail Modal */}
