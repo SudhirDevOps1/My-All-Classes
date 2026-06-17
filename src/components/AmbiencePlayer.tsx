@@ -110,7 +110,7 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute top-full mt-2 left-0 w-64 bg-slate-950/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-[999] overflow-hidden max-h-64 overflow-y-auto pretty-scrollbar"
+                className="absolute top-full mt-2 right-0 sm:-left-4 w-64 bg-slate-950/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-[99999] overflow-hidden max-h-64 overflow-y-auto pretty-scrollbar"
               >
                 {initialPlaylist.map((track, i) => (
                   <button

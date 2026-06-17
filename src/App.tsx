@@ -77,11 +77,7 @@ const MOTIVATIONAL_QUOTES = [
   { text: "The secret of getting ahead is getting started.", author: "Mark Twain" }
 ];
 
-const DEFAULT_PLAYLIST = [
-  { id: '1', name: 'Deep Focus & Flow', url: 'https://www.youtube.com/watch?v=5qap5aO4i9A' },
-  { id: '2', name: 'Lofi Chill Study', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
-  { id: '3', name: 'Rain & Ambient Study', url: 'https://www.youtube.com/watch?v=mPZkdNFkNps' }
-];
+
 
 const App: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -596,10 +592,6 @@ const App: React.FC = () => {
         if (foundPlaylist && foundProfile) break; // Stop if we found both
       }
     }
-    // Set default playlist if none found in JSON
-    if (!foundPlaylist) {
-      setPlaylist(DEFAULT_PLAYLIST);
-    }
   }, [loadedDates]);
 
   const getLatestAllowedDate = () => {
@@ -717,7 +709,7 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'transparent' }}>
       <AnimatedBackground />
 
-      <header className="relative z-10 bg-slate-900/60 backdrop-blur-2xl border-b border-white/[0.08] sticky top-0">
+      <header className="relative z-50 bg-slate-900/60 backdrop-blur-2xl border-b border-white/[0.08] sticky top-0">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
