@@ -758,6 +758,27 @@ const App: React.FC = () => {
             </nav>
 
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              {/* User Profile */}
+              {userProfile && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-xl mr-1 sm:mr-2 shadow-lg"
+                >
+                  {userProfile.avatar ? (
+                    <img src={userProfile.avatar} alt={userProfile.name} className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white">
+                      {userProfile.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-[10px] sm:text-xs font-bold text-white leading-none truncate max-w-[80px] sm:max-w-[120px]">{userProfile.name}</span>
+                    <span className="text-[8px] sm:text-[9px] text-purple-400 font-medium leading-none mt-0.5">Student</span>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Ambience Player Widget */}
               <div className="mr-1 sm:mr-2">
                 <AmbiencePlayer initialPlaylist={playlist} />
