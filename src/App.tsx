@@ -76,6 +76,12 @@ const MOTIVATIONAL_QUOTES = [
   { text: "The secret of getting ahead is getting started.", author: "Mark Twain" }
 ];
 
+const DEFAULT_PLAYLIST = [
+  { id: '1', name: 'Deep Focus & Flow', url: 'https://www.youtube.com/watch?v=5qap5aO4i9A' },
+  { id: '2', name: 'Lofi Chill Study', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
+  { id: '3', name: 'Rain & Ambient Study', url: 'https://www.youtube.com/watch?v=mPZkdNFkNps' }
+];
+
 const App: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [dayData, setDayData] = useState<DayData | null>(null);
@@ -567,23 +573,31 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Search settings in loaded data
+    let foundPlaylist = false;
+    let foundProfile = false;
     for (const key of Object.keys(loadedDates)) {
       const data = loadedDates[key];
       if (data?.settings) {
         const profileEntry = data.settings.find(s => s.key === 'user_profile');
-        if (profileEntry) {
+        if (profileEntry && !foundProfile) {
           try {
             setUserProfile(JSON.parse(profileEntry.value));
+            foundProfile = true;
           } catch {}
         }
         const playlistEntry = data.settings.find(s => s.key === 'ambience_playlist');
-        if (playlistEntry) {
+        if (playlistEntry && !foundPlaylist) {
           try {
             setPlaylist(JSON.parse(playlistEntry.value));
+            foundPlaylist = true;
           } catch {}
         }
-        break; // Stop at first file containing user settings
+        if (foundPlaylist && foundProfile) break; // Stop if we found both
       }
+    }
+    // Set default playlist if none found in JSON
+    if (!foundPlaylist) {
+      setPlaylist(DEFAULT_PLAYLIST);
     }
   }, [loadedDates]);
 
@@ -725,7 +739,9 @@ const App: React.FC = () => {
                 </motion.div>
                 <div className="min-w-0">
                   <h1 className="text-base sm:text-lg font-bold gradient-text truncate">FlowTrack</h1>
-                  <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">Study Tracker Pro</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">
+                    Study Tracker Pro <span className="ml-1 text-purple-400 font-medium tracking-wide">✨ Premium UI</span>
+                  </p>
                 </div>
               </div>
             </div>
