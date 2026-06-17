@@ -11,7 +11,7 @@ interface SidebarProps {
   onDateSelect: (date: Date) => void;
   viewMode: ViewMode;
   onViewChange: (mode: ViewMode) => void;
-  userProfile?: { name: string; age: string; profession: string; goal: string } | null;
+  userProfile?: { name: string; avatar?: string; age?: string; profession?: string; goal?: string } | null;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({

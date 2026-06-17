@@ -15,7 +15,7 @@ import AnimatedBackground from './components/AnimatedBackground';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AmbiencePlayer } from './components/AmbiencePlayer';
 
-import { Menu, X, Download, Loader2, Sparkles, Wifi, WifiOff, Flame } from 'lucide-react';
+import { Menu, X, Download, Loader2, Sparkles, Flame } from 'lucide-react';
 
 const STORAGE_PREFIX = 'flowtrack_';
 const CACHE_PREFIX = 'flowtrack_cache_';
@@ -90,7 +90,7 @@ const App: React.FC = () => {
   const [loadedDates, setLoadedDates] = useState<DateDataMap>({});
   const [availableDates, setAvailableDates] = useState<Date[]>([]);
   const [streak, setStreak] = useState<number>(0);
-  const [userProfile, setUserProfile] = useState<{ name: string; age: string; profession: string; goal: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ name: string; avatar?: string; age?: string; profession?: string; goal?: string } | null>(null);
   const [playlist, setPlaylist] = useState<{ id: string; name: string; url: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
@@ -171,7 +171,7 @@ const App: React.FC = () => {
     };
 
     // ── Step 1: Load localStorage data immediately ──────────────────
-    const registerLocalEntry = (dateKey: string, raw: string | null) => {
+    const registerLocalEntry = (_dateKey: string, raw: string | null) => {
       if (!raw) return;
       try {
         const data = JSON.parse(raw) as DayData;

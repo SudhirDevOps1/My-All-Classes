@@ -32,7 +32,7 @@ const itemVariants = {
   }
 };
 
-const Dashboard: React.FC<DashboardProps> = ({ data, streak, playlist }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, streak }) => {
   const stats = calculateDayStats(data);
   const upcomingSession = getUpcomingSession(data.sessions);
   const currentSession = getCurrentSession(data.sessions);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Volume2, VolumeX, Link2, ChevronDown, Play, Pause, SkipForward } from "lucide-react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 
