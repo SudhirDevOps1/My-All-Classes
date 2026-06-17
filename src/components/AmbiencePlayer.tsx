@@ -16,14 +16,19 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
   // Helper to determine window bounds for dragging
   const [bounds, setBounds] = useState({ top: -500, left: -500, right: 0, bottom: 0 });
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setBounds({
-        top: -window.innerHeight + 250,
-        left: -window.innerWidth + 400,
-        right: 0,
-        bottom: 0
-      });
-    }
+    const updateBounds = () => {
+      if (typeof window !== 'undefined') {
+        setBounds({
+          top: -(window.innerHeight - 320), // Prevent going off-screen at top
+          left: -(window.innerWidth - 380), // Prevent going off-screen at left
+          right: 0,
+          bottom: 0
+        });
+      }
+    };
+    updateBounds();
+    window.addEventListener('resize', updateBounds);
+    return () => window.removeEventListener('resize', updateBounds);
   }, []);
 
   useEffect(() => {
@@ -197,7 +202,7 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
           className="fixed bottom-2 right-2 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-2xl z-[9999] w-[380px] max-w-[90vw] backdrop-blur-xl"
         >
           <div 
-            className="flex items-center justify-between p-1.5 px-2.5 cursor-move hover:bg-white/5 rounded-t-xl transition-colors"
+            className="flex items-center justify-between p-1.5 px-2.5 cursor-move hover:bg-white/5 rounded-t-xl transition-colors touch-none"
             onPointerDown={(e) => dragControls.start(e)}
           >
             <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 select-none pointer-events-none">
