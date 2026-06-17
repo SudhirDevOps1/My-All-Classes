@@ -1,88 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Volume2, VolumeX, CloudRain, TreePine, Coffee, Hash, ChevronDown, Play, Pause, FolderOpen, Link2, SkipForward, Plus, Trash2 } from "lucide-react";
+import { Volume2, VolumeX, Link2, ChevronDown, Play, Pause, SkipForward } from "lucide-react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-
-const SOUNDS = [
-  { 
-    id: "rain", 
-    name: "Rain Loops", 
-    icon: <CloudRain className="w-4 h-4" />, 
-    url: "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg" 
-  },
-  { 
-    id: "forest", 
-    name: "Forest Birds", 
-    icon: <TreePine className="w-4 h-4" />, 
-    url: "https://actions.google.com/sounds/v1/nature/forest_birds.ogg" 
-  },
-  { 
-    id: "lofi", 
-    name: "Coffee Shop", 
-    icon: <Coffee className="w-4 h-4" />, 
-    url: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg" 
-  },
-  { 
-    id: "white_noise", 
-    name: "River Streams", 
-    icon: <Hash className="w-4 h-4" />, 
-    url: "https://actions.google.com/sounds/v1/water/river_stream.ogg" 
-  },
-  {
-    id: "local",
-    name: "Local Audio File",
-    icon: <FolderOpen className="w-4 h-4" />,
-    url: ""
-  },
-  {
-    id: "youtube",
-    name: "YouTube / Link",
-    icon: <Link2 className="w-4 h-4" />,
-    url: ""
-  }
-];
 
 export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Array<{id: string, name: string, url: string}> }) {
   const [isMusicEnabled, setFocusMusicEnabled] = useState(false);
-  
-  const [selectedTrack, setSelectedTrack] = useState(SOUNDS[0]);
   const [volume, setVolume] = useState(0.5);
   const [isOpen, setIsOpen] = useState(false);
-  
-  const [localUrl, setLocalUrl] = useState<string>("");
-  const [localFileName, setLocalFileName] = useState<string>("");
-  const [webUrl] = useState<string>("");
-  const [isUrlInputOpen, setIsUrlInputOpen] = useState(false);
-  const dragControls = useDragControls();
-  
-  // Playlist state
-  const [savedPlaylist, setSavedPlaylist] = useState<Array<{ id: string; name: string; url: string }>>([
-    { id: "p1", name: "Lofi Focus Beats (1 Hour)", url: "https://www.youtube.com/watch?v=1fueZCTYkpA" },
-    { id: "p2", name: "Deep Focus Ambient", url: "https://www.youtube.com/watch?v=kgx4WGK0oNU" }
-  ]);
-  const [newTrackName, setNewTrackName] = useState("");
-  const [newTrackUrl, setNewTrackUrl] = useState("");
   const [currentPlaylistIndex, setCurrentPlaylistIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dragControls = useDragControls();
 
-  // Load playlist from localStorage or initialPlaylist
-  useEffect(() => {
-    try {
-      const local = localStorage.getItem("custom_ambience_playlist");
-      if (local) {
-        setSavedPlaylist(JSON.parse(local));
-      } else if (initialPlaylist.length > 0) {
-        setSavedPlaylist(initialPlaylist);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [initialPlaylist]);
+  if (!initialPlaylist || initialPlaylist.length === 0) return null;
 
-  const savePlaylistToDb = (list: typeof savedPlaylist) => {
-    setSavedPlaylist(list);
-    localStorage.setItem("custom_ambience_playlist", JSON.stringify(list));
-  };
+  const currentTrack = initialPlaylist[currentPlaylistIndex] || initialPlaylist[0];
+  const activeUrl = currentTrack?.url || "";
 
   useEffect(() => {
     if (audioRef.current) {
@@ -90,9 +21,6 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
     }
   }, [volume]);
 
-  // Track switching & playback
-  const activeUrl = selectedTrack.id === "youtube" ? savedPlaylist[currentPlaylistIndex]?.url || webUrl : selectedTrack.url;
-  
   const getYoutubeId = (url: string) => {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -100,86 +28,36 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
+  const videoId = getYoutubeId(activeUrl);
+
   useEffect(() => {
     if (isMusicEnabled) {
-      const isYoutubeVideo = selectedTrack.id === "youtube" && activeUrl && getYoutubeId(activeUrl);
+      const isYoutubeVideo = activeUrl && videoId;
       
       if (isYoutubeVideo) {
         // Stop HTML audio if YouTube iframe is handling playback
         audioRef.current?.pause();
       } else {
-        if (selectedTrack.id === "local" && localUrl) {
-          if (audioRef.current && audioRef.current.src !== localUrl) {
-            audioRef.current.src = localUrl;
-            audioRef.current.load();
-          }
-        } else if (selectedTrack.id === "youtube" && activeUrl && !getYoutubeId(activeUrl)) {
+        if (activeUrl) {
           if (audioRef.current && audioRef.current.src !== activeUrl) {
             audioRef.current.src = activeUrl;
             audioRef.current.load();
           }
-        } else if (selectedTrack.url) {
-          if (audioRef.current && audioRef.current.src !== selectedTrack.url) {
-            audioRef.current.src = selectedTrack.url;
-            audioRef.current.load();
-          }
+          audioRef.current?.play().catch(e => {
+            console.log("Audio play blocked", e);
+          });
         }
-        
-        audioRef.current?.play().catch(e => {
-          console.log("Audio play blocked, waiting for user interaction.", e);
-        });
       }
     } else {
       audioRef.current?.pause();
     }
-  }, [isMusicEnabled, selectedTrack, localUrl, activeUrl]);
-
-  useEffect(() => {
-    return () => {
-      if (localUrl) {
-        URL.revokeObjectURL(localUrl);
-      }
-    };
-  }, [localUrl]);
-
-  const handleLocalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (localUrl) URL.revokeObjectURL(localUrl);
-      const url = URL.createObjectURL(file);
-      setLocalUrl(url);
-      setLocalFileName(file.name);
-      setFocusMusicEnabled(true);
-    }
-  };
-
-  const videoId = getYoutubeId(activeUrl);
+  }, [isMusicEnabled, activeUrl, videoId]);
 
   const handleNextTrack = () => {
-    if (selectedTrack.id === "youtube" && savedPlaylist.length > 0) {
-      const nextIndex = (currentPlaylistIndex + 1) % savedPlaylist.length;
+    if (initialPlaylist.length > 0) {
+      const nextIndex = (currentPlaylistIndex + 1) % initialPlaylist.length;
       setCurrentPlaylistIndex(nextIndex);
       setFocusMusicEnabled(true);
-    }
-  };
-
-  const handleAddTrack = () => {
-    if (!newTrackUrl.trim() || !newTrackName.trim()) return;
-    const newList = [
-      ...savedPlaylist,
-      { id: crypto.randomUUID(), name: newTrackName.trim(), url: newTrackUrl.trim() }
-    ];
-    savePlaylistToDb(newList);
-    setNewTrackName("");
-    setNewTrackUrl("");
-  };
-
-  const handleDeleteTrack = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newList = savedPlaylist.filter(t => t.id !== id);
-    savePlaylistToDb(newList);
-    if (currentPlaylistIndex >= newList.length) {
-      setCurrentPlaylistIndex(Math.max(0, newList.length - 1));
     }
   };
 
@@ -198,16 +76,18 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
         >
           {isMusicEnabled ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </button>
-        {/* Skip Button for YouTube playlist */}
-        {selectedTrack.id === "youtube" && savedPlaylist.length > 1 && (
+
+        {/* Skip Button */}
+        {initialPlaylist.length > 1 && (
           <button
             onClick={handleNextTrack}
             className="flex items-center justify-center p-2 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10"
-            title="Next saved stream"
+            title="Next Track"
           >
             <SkipForward className="w-3.5 h-3.5" />
           </button>
         )}
+
         {/* Sound Selection Button */}
         <div className="relative">
           <button
@@ -215,17 +95,14 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
             className="flex items-center gap-2 hover:bg-white/5 rounded-xl px-2.5 py-2 transition-colors text-slate-300 hover:text-white"
           >
             <div className="text-purple-400">
-              {selectedTrack.icon}
+              <Link2 className="w-4 h-4" />
             </div>
-            <span className="text-xs sm:text-sm font-semibold max-w-[70px] sm:max-w-[95px] truncate">
-              {selectedTrack.id === "local" && localFileName 
-                ? localFileName 
-                : selectedTrack.id === "youtube" && savedPlaylist[currentPlaylistIndex]
-                  ? savedPlaylist[currentPlaylistIndex].name 
-                  : selectedTrack.name}
+            <span className="text-xs sm:text-sm font-semibold max-w-[70px] sm:max-w-[120px] truncate">
+              {currentTrack.name}
             </span>
             <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </button>
+
           {/* Dropdown Menu */}
           <AnimatePresence>
             {isOpen && (
@@ -233,28 +110,22 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute top-full mt-2 left-0 w-52 bg-slate-950/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-[999] overflow-hidden"
+                className="absolute top-full mt-2 left-0 w-64 bg-slate-950/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl z-[999] overflow-hidden max-h-64 overflow-y-auto pretty-scrollbar"
               >
-                {SOUNDS.map((track) => (
+                {initialPlaylist.map((track, i) => (
                   <button
                     key={track.id}
                     onClick={() => {
-                      setSelectedTrack(track);
+                      setCurrentPlaylistIndex(i);
                       setIsOpen(false);
-                      if (track.id === "local") {
-                        fileInputRef.current?.click();
-                      } else if (track.id === "youtube") {
-                        setIsUrlInputOpen(true);
-                      } else {
-                        setIsUrlInputOpen(false);
-                      }
+                      setFocusMusicEnabled(true);
                     }}
                     className={`flex items-center gap-3 w-full p-3 text-sm text-left transition-colors hover:bg-white/10 ${
-                      selectedTrack.id === track.id ? "text-purple-400 bg-white/5" : "text-slate-300"
+                      currentPlaylistIndex === i ? "text-purple-400 bg-white/5" : "text-slate-300"
                     }`}
                   >
-                    <div className={`${selectedTrack.id === track.id ? "text-purple-400" : "text-slate-500"}`}>
-                      {track.icon}
+                    <div className={`${currentPlaylistIndex === i ? "text-purple-400" : "text-slate-500"}`}>
+                      <Link2 className="w-4 h-4" />
                     </div>
                     <span className="font-semibold">{track.name}</span>
                   </button>
@@ -263,7 +134,9 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
             )}
           </AnimatePresence>
         </div>
+
         <div className="w-[1px] h-6 bg-white/10 mx-1 hidden sm:block" />
+
         {/* Volume Controls */}
         <div className="hidden sm:flex items-center gap-2">
           <button 
@@ -283,79 +156,9 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
           />
         </div>
       </div>
-      {/* Hidden file input for Local Audio */}
-      <input 
-        ref={fileInputRef}
-        type="file" 
-        accept="audio/*" 
-        className="hidden" 
-        onChange={handleLocalFileChange}
-      />
-      {/* Playlist & Add Track Form */}
-      {selectedTrack.id === "youtube" && isUrlInputOpen && (
-        <div className="flex flex-col gap-3 p-3 bg-slate-900/95 border border-white/10 rounded-2xl w-80 max-w-[90vw] shadow-2xl z-30 absolute top-full mt-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-300">🎵 Saved Stream Playlist</span>
-            <button onClick={() => setIsUrlInputOpen(false)} className="text-xs text-slate-500 hover:text-white">✕ Hide</button>
-          </div>
-          
-          {/* Playlist Tracks List */}
-          <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-            {savedPlaylist.map((track, i) => (
-              <div 
-                key={track.id} 
-                onClick={() => {
-                  setCurrentPlaylistIndex(i);
-                  setFocusMusicEnabled(true);
-                }}
-                className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer border ${
-                  currentPlaylistIndex === i 
-                    ? "bg-purple-500/10 border-purple-400/25 text-purple-300 font-bold" 
-                    : "bg-white/[0.02] border-white/5 text-slate-300 hover:bg-white/5"
-                }`}
-              >
-                <span className="truncate pr-2">{track.name}</span>
-                <button 
-                  onClick={(e) => handleDeleteTrack(track.id, e)}
-                  className="text-slate-500 hover:text-red-400 transition-colors p-1"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-            {savedPlaylist.length === 0 && (
-              <p className="text-[10px] text-slate-500 text-center py-2">No custom links saved yet.</p>
-            )}
-          </div>
-          <div className="border-t border-white/10 pt-2 flex flex-col gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Add custom Link:</span>
-            <input
-              type="text"
-              placeholder="Track Name (e.g. Chillhop Lofi)"
-              value={newTrackName}
-              onChange={(e) => setNewTrackName(e.target.value)}
-              className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-purple-400"
-            />
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Paste YouTube link..."
-                value={newTrackUrl}
-                onChange={(e) => setNewTrackUrl(e.target.value)}
-                className="flex-1 bg-slate-950 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-purple-400"
-              />
-              <button 
-                onClick={handleAddTrack}
-                className="bg-purple-500 text-white hover:bg-purple-400 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center justify-center"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Embedded YouTube video card if videoId exists and music is enabled */}
-      {selectedTrack.id === "youtube" && videoId && isMusicEnabled && (
+
+      {/* Embedded YouTube video card */}
+      {videoId && isMusicEnabled && (
         <motion.div 
           drag 
           dragControls={dragControls}
@@ -391,11 +194,9 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
           </div>
         </motion.div>
       )}
-      {/* HTML5 Audio element for standard looping tracks */}
-      <audio
-        ref={audioRef}
-        loop
-      />
+
+      {/* HTML5 Audio element for standard tracks */}
+      <audio ref={audioRef} loop />
     </div>
   );
 }
