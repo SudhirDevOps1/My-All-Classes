@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Volume2, VolumeX, Link2, ChevronDown, Play, Pause, SkipForward } from "lucide-react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 
@@ -191,8 +192,8 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
         </div>
       </div>
 
-      {/* Embedded YouTube video card */}
-      {videoId && isMusicEnabled && (
+      {/* Embedded YouTube video card - rendered via Portal to escape header's backdrop-blur transform */}
+      {videoId && isMusicEnabled && createPortal(
         <motion.div 
           drag 
           dragControls={dragControls}
@@ -227,7 +228,8 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
               className="rounded-xl bg-black"
             ></iframe>
           </div>
-        </motion.div>
+        </motion.div>,
+        document.body
       )}
 
       {/* HTML5 Audio element for standard tracks */}
