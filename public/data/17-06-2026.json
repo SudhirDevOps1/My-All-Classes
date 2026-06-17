@@ -1,0 +1,447 @@
+{
+  "app": "FlowTrack",
+  "exportedAt": "2026-06-17T11:49:46.872Z",
+  "subjects": [
+    {
+      "id": "ai_ml_001",
+      "name": "AI / ML Study",
+      "color": "#9C27B0",
+      "createdAt": "2026-06-12T07:00:00.000Z"
+    },
+    {
+      "id": "assignment_004",
+      "name": "Assignment / Exam Prep",
+      "color": "#F44336",
+      "createdAt": "2026-06-12T07:00:00.000Z"
+    },
+    {
+      "id": "english_005",
+      "name": "English Language",
+      "color": "#00BCD4",
+      "createdAt": "2026-06-12T07:00:00.000Z"
+    },
+    {
+      "id": "java_003",
+      "name": "Java Programming",
+      "color": "#FF5722",
+      "createdAt": "2026-06-12T07:00:00.000Z"
+    },
+    {
+      "id": "webdev_002",
+      "name": "Web Development",
+      "color": "#2196F3",
+      "createdAt": "2026-06-12T07:00:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "90f1f520-f037-4c58-9388-db79cacb7089",
+      "subjectId": "assignment_004",
+      "startTime": "2026-06-17T12:45:00.000Z",
+      "endTime": "2026-06-17T14:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#F44336",
+      "notes": "Assignment / Exam preparation: complete pending tasks (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-17T05:08:12.826Z",
+      "updatedAt": "2026-06-17T05:08:12.826Z",
+      "manualEntry": false
+    },
+    {
+      "id": "829be643-4ef1-4400-9013-d4747f24d536",
+      "subjectId": "english_005",
+      "startTime": "2026-06-17T11:45:00.000Z",
+      "endTime": "2026-06-17T12:45:00.000Z",
+      "plannedMinutes": 60,
+      "actualSeconds": 0,
+      "colorTag": "#00BCD4",
+      "notes": "English: vocabulary, grammar, reading comprehension (1 hour)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-17T05:08:12.826Z",
+      "updatedAt": "2026-06-17T05:08:12.826Z",
+      "manualEntry": false
+    },
+    {
+      "id": "0be2674c-0358-4784-883a-8ee1c6316bfb",
+      "subjectId": "java_003",
+      "startTime": "2026-06-17T09:30:00.000Z",
+      "endTime": "2026-06-17T11:30:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#FF5722",
+      "notes": "Java: OOP, DSA, coding problems (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-17T05:08:12.826Z",
+      "updatedAt": "2026-06-17T05:08:12.826Z",
+      "manualEntry": false
+    },
+    {
+      "id": "1462ae12-603a-483c-a290-1d68eb4470e8",
+      "subjectId": "webdev_002",
+      "startTime": "2026-06-17T07:00:00.000Z",
+      "endTime": "2026-06-17T09:00:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 1206,
+      "colorTag": "#2196F3",
+      "notes": "Web Development: HTML/CSS/JS or framework practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-17T05:08:12.826Z",
+      "updatedAt": "2026-06-17T07:21:09.753Z",
+      "manualEntry": false
+    },
+    {
+      "id": "6d5658ae-d740-43fb-90b5-e14c7f50934a",
+      "subjectId": "ai_ml_001",
+      "startTime": "2026-06-17T04:45:00.000Z",
+      "endTime": "2026-06-17T06:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 7772,
+      "colorTag": "#9C27B0",
+      "notes": "AI/ML study: theory + coding practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-17T05:08:12.826Z",
+      "updatedAt": "2026-06-17T11:41:47.576Z",
+      "manualEntry": false
+    },
+    {
+      "id": "7493d3ef-c9b9-478f-81b2-47ee7e2ba6a0",
+      "subjectId": "assignment_004",
+      "startTime": "2026-06-16T12:45:00.000Z",
+      "endTime": "2026-06-16T14:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 100,
+      "colorTag": "#F44336",
+      "notes": "Assignment / Exam preparation: complete pending tasks (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-16T06:22:46.220Z",
+      "updatedAt": "2026-06-16T06:25:38.271Z",
+      "manualEntry": false
+    },
+    {
+      "id": "581e5531-b4e4-47ac-acc9-898ff7414dd6",
+      "subjectId": "english_005",
+      "startTime": "2026-06-16T11:45:00.000Z",
+      "endTime": "2026-06-16T12:45:00.000Z",
+      "plannedMinutes": 60,
+      "actualSeconds": 9446,
+      "colorTag": "#00BCD4",
+      "notes": "English: vocabulary, grammar, reading comprehension (1 hour)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-16T06:22:46.220Z",
+      "updatedAt": "2026-06-16T09:05:00.229Z",
+      "manualEntry": false
+    },
+    {
+      "id": "22269e0d-9818-41e7-9aee-ef819f460851",
+      "subjectId": "java_003",
+      "startTime": "2026-06-16T09:30:00.000Z",
+      "endTime": "2026-06-16T11:30:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 6528,
+      "colorTag": "#FF5722",
+      "notes": "Java: OOP, DSA, coding problems (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-16T06:22:46.220Z",
+      "updatedAt": "2026-06-16T13:33:09.013Z",
+      "manualEntry": false
+    },
+    {
+      "id": "fab5c9c0-7dab-43b9-ad30-84b14d3e9d5b",
+      "subjectId": "webdev_002",
+      "startTime": "2026-06-16T07:00:00.000Z",
+      "endTime": "2026-06-16T09:00:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 7206,
+      "colorTag": "#2196F3",
+      "notes": "Web Development: HTML/CSS/JS or framework practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-16T06:22:46.220Z",
+      "updatedAt": "2026-06-16T11:07:33.951Z",
+      "manualEntry": false
+    },
+    {
+      "id": "f574e04b-ea8b-43c7-a108-b7ca68f7479f",
+      "subjectId": "ai_ml_001",
+      "startTime": "2026-06-16T04:45:00.000Z",
+      "endTime": "2026-06-16T06:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#9C27B0",
+      "notes": "AI/ML study: theory + coding practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-16T06:22:46.220Z",
+      "updatedAt": "2026-06-16T06:22:46.220Z",
+      "manualEntry": false
+    },
+    {
+      "id": "0c9fb43d-046d-4f93-90f3-fe0d729ac83b",
+      "subjectId": "assignment_004",
+      "startTime": "2026-06-15T12:45:00.000Z",
+      "endTime": "2026-06-15T14:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 124,
+      "colorTag": "#F44336",
+      "notes": "Assignment / Exam preparation: complete pending tasks (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-15T09:30:14.534Z",
+      "updatedAt": "2026-06-16T06:22:55.732Z",
+      "manualEntry": false
+    },
+    {
+      "id": "1361d243-e7c5-4b69-9f97-6c7032301aac",
+      "subjectId": "english_005",
+      "startTime": "2026-06-15T11:45:00.000Z",
+      "endTime": "2026-06-15T12:45:00.000Z",
+      "plannedMinutes": 60,
+      "actualSeconds": 0,
+      "colorTag": "#00BCD4",
+      "notes": "English: vocabulary, grammar, reading comprehension (1 hour)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-15T09:30:14.534Z",
+      "updatedAt": "2026-06-15T09:30:14.534Z",
+      "manualEntry": false
+    },
+    {
+      "id": "e6505efe-50dd-4d18-ac22-1e13671934a2",
+      "subjectId": "java_003",
+      "startTime": "2026-06-15T09:30:00.000Z",
+      "endTime": "2026-06-15T11:30:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#FF5722",
+      "notes": "Java: OOP, DSA, coding problems (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-15T09:30:14.534Z",
+      "updatedAt": "2026-06-15T09:30:14.534Z",
+      "manualEntry": false
+    },
+    {
+      "id": "8e1c22bd-ea79-4bc2-bdb3-d0151c41db06",
+      "subjectId": "webdev_002",
+      "startTime": "2026-06-15T07:00:00.000Z",
+      "endTime": "2026-06-15T09:00:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#2196F3",
+      "notes": "Web Development: HTML/CSS/JS or framework practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-15T09:30:14.534Z",
+      "updatedAt": "2026-06-15T09:30:14.534Z",
+      "manualEntry": false
+    },
+    {
+      "id": "a04ff225-c050-40d3-9696-0ea0cd5c3acb",
+      "subjectId": "ai_ml_001",
+      "startTime": "2026-06-15T04:45:00.000Z",
+      "endTime": "2026-06-15T06:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#9C27B0",
+      "notes": "AI/ML study: theory + coding practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-15T09:30:14.534Z",
+      "updatedAt": "2026-06-15T09:30:14.534Z",
+      "manualEntry": false
+    },
+    {
+      "id": "session_assign_1",
+      "subjectId": "assignment_004",
+      "startTime": "2026-06-12T12:45:00.000Z",
+      "endTime": "2026-06-12T14:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 0,
+      "colorTag": "#F44336",
+      "notes": "Assignment / Exam preparation: complete pending tasks (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-12T07:00:00.000Z",
+      "updatedAt": "2026-06-12T07:00:00.000Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_eng_1",
+      "subjectId": "english_005",
+      "startTime": "2026-06-12T11:45:00.000Z",
+      "endTime": "2026-06-12T12:45:00.000Z",
+      "plannedMinutes": 60,
+      "actualSeconds": 66,
+      "colorTag": "#00BCD4",
+      "notes": "English: vocabulary, grammar, reading comprehension (1 hour)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-12T07:00:00.000Z",
+      "updatedAt": "2026-06-12T07:40:27.749Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_java_1",
+      "subjectId": "java_003",
+      "startTime": "2026-06-12T09:30:00.000Z",
+      "endTime": "2026-06-12T11:30:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 1200,
+      "colorTag": "#FF5722",
+      "notes": "Java: OOP, DSA, coding problems (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "planned",
+      "createdAt": "2026-06-12T07:00:00.000Z",
+      "updatedAt": "2026-06-12T07:40:54.290Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_web_1",
+      "subjectId": "webdev_002",
+      "startTime": "2026-06-12T07:00:00.000Z",
+      "endTime": "2026-06-12T09:00:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 3481,
+      "colorTag": "#2196F3",
+      "notes": "Web Development: HTML/CSS/JS or framework practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-12T07:00:00.000Z",
+      "updatedAt": "2026-06-16T06:23:21.175Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    },
+    {
+      "id": "session_ai_1",
+      "subjectId": "ai_ml_001",
+      "startTime": "2026-06-12T04:45:00.000Z",
+      "endTime": "2026-06-12T06:45:00.000Z",
+      "plannedMinutes": 120,
+      "actualSeconds": 16,
+      "colorTag": "#9C27B0",
+      "notes": "AI/ML study: theory + coding practice (2 hours)",
+      "tags": [
+        "focus"
+      ],
+      "status": "completed",
+      "createdAt": "2026-06-12T07:00:00.000Z",
+      "updatedAt": "2026-06-12T07:39:46.202Z",
+      "manualEntry": false,
+      "seriesId": null,
+      "parentSessionId": null,
+      "recurrence": null
+    }
+  ],
+  "settings": [
+    {
+      "key": "ai_config",
+      "value": "{\"provider\":\"groq\",\"apiKey\":\"\",\"model\":\"llama-3.1-8b-instant\",\"ollamaUrl\":\"http://localhost:11434\",\"apiKeys\":{\"gemini\":\"\",\"cerebras\":\"\",\"openai\":\"\",\"mistral\":\"\",\"grok\":\"\",\"groq\":\"\",\"ollama\":\"\",\"local_rules\":\"\"}}"
+    },
+    {
+      "key": "ambience_playlist",
+      "value": "[{\"id\":\"d602e63e-d8aa-4db6-9167-f967a8f1df1d\",\"name\":\"gehra hua\",\"url\":\"https://youtu.be/MxIEUzBJn8U?si=sYim-o1tHVzhacS3\"},{\"id\":\"b2286a80-dcdb-4d7d-a239-c0b4d49c4f90\",\"name\":\"arjit singh\",\"url\":\"https://youtu.be/vawQkesDKus?si=OntEH3UPuQ_NO9j9\"},{\"id\":\"d9128ac5-eee1-42fc-a4e7-2eec73311cef\",\"name\":\"sajna\",\"url\":\"https://youtu.be/hZt6OKr5NT8?si=fS7ReHZi8LImc51B\"},{\"id\":\"fc246c3c-047e-4971-b921-1586f840efae\",\"name\":\"mahi ve\",\"url\":\"https://youtu.be/UGJVMf59SrM?si=3C7SIflJMBKlGnQf\"},{\"id\":\"47c2d13f-0301-42c4-ae27-bf1e362d483f\",\"name\":\"bajirav mstani\",\"url\":\"https://youtu.be/h6lHUn20J5g?si=xGKOz80F-wOzhTVX\"},{\"id\":\"1a404f3f-e402-46ec-b4ff-efaf183594e7\",\"name\":\"ye hasi wadiya\",\"url\":\"https://youtu.be/7AeJgxhfu70?si=DKyEliXDzUKkg6j-\"}]"
+    },
+    {
+      "key": "autoPauseOnHidden",
+      "value": "true"
+    },
+    {
+      "key": "dailyGoalHitStreak",
+      "value": "1"
+    },
+    {
+      "key": "focusMusicEnabled",
+      "value": "false"
+    },
+    {
+      "key": "keyboardShortcutsEnabled",
+      "value": "true"
+    },
+    {
+      "key": "notificationsEnabled",
+      "value": "true"
+    },
+    {
+      "key": "pomodoroMode",
+      "value": "false"
+    },
+    {
+      "key": "pomodoroSettings",
+      "value": "{\"workMinutes\":25,\"shortBreakMinutes\":5,\"longBreakMinutes\":15,\"cyclesBeforeLongBreak\":4,\"autoStartBreaks\":true,\"autoStartWork\":true,\"desktopNotifications\":true}"
+    },
+    {
+      "key": "strictFocusMode",
+      "value": "true"
+    },
+    {
+      "key": "theme",
+      "value": "forest"
+    },
+    {
+      "key": "timer",
+      "value": "{\"activeSessionId\":null,\"startedAtMs\":null,\"accumulatedSeconds\":0,\"pausedAtMs\":null,\"isPaused\":false,\"hiddenAtMs\":null,\"lastInteractionAtMs\":null}"
+    },
+    {
+      "key": "user_profile",
+      "value": "{\"name\":\"Sudhir Singh\",\"age\":\"21\",\"profession\":\"Bca\",\"goal\":\"Hacking\"}"
+    }
+  ]
+}
