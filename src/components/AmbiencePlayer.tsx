@@ -10,9 +10,7 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const dragControls = useDragControls();
 
-  if (!initialPlaylist || initialPlaylist.length === 0) return null;
-
-  const currentTrack = initialPlaylist[currentPlaylistIndex] || initialPlaylist[0];
+  const currentTrack = initialPlaylist?.[currentPlaylistIndex] || initialPlaylist?.[0];
   const activeUrl = currentTrack?.url || "";
 
   useEffect(() => {
@@ -60,6 +58,8 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
       setFocusMusicEnabled(true);
     }
   };
+
+  if (!initialPlaylist || initialPlaylist.length === 0 || !currentTrack) return null;
 
   return (
     <div className="flex flex-col gap-2 relative">
