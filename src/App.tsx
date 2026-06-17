@@ -779,18 +779,21 @@ const App: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-xl mr-1 sm:mr-2 shadow-lg"
+                  className="flex items-center gap-2 px-1.5 sm:px-2.5 py-1 sm:py-1.5 bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl mr-1 sm:mr-2 shadow-lg shadow-purple-500/10 hover:border-purple-500/50 transition-colors cursor-pointer group"
                 >
-                  {userProfile.avatar ? (
-                    <img src={userProfile.avatar} alt={userProfile.name} className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg object-cover" />
-                  ) : (
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white">
-                      {userProfile.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="flex flex-col">
+                  <div className="relative">
+                    {userProfile.avatar ? (
+                      <img src={userProfile.avatar} alt={userProfile.name} className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl object-cover border border-white/20 group-hover:border-purple-400/50 transition-colors" />
+                    ) : (
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 via-fuchsia-500 to-indigo-500 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white shadow-inner border border-white/10 group-hover:border-purple-400/50 transition-colors">
+                        {userProfile.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 border-2 border-slate-900 rounded-full"></div>
+                  </div>
+                  <div className="hidden sm:flex flex-col">
                     <span className="text-[10px] sm:text-xs font-bold text-white leading-none truncate max-w-[80px] sm:max-w-[120px]">{userProfile.name}</span>
-                    <span className="text-[8px] sm:text-[9px] text-purple-400 font-medium leading-none mt-0.5">Student</span>
+                    <span className="text-[8px] sm:text-[9px] text-purple-400 font-medium leading-none mt-1 group-hover:text-purple-300 transition-colors">Student</span>
                   </div>
                 </motion.div>
               )}

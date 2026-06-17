@@ -13,6 +13,19 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
   const currentTrack = initialPlaylist?.[currentPlaylistIndex] || initialPlaylist?.[0];
   const activeUrl = currentTrack?.url || "";
 
+  // Helper to determine window bounds for dragging
+  const [bounds, setBounds] = useState({ top: -500, left: -500, right: 0, bottom: 0 });
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setBounds({
+        top: -window.innerHeight + 250,
+        left: -window.innerWidth + 400,
+        right: 0,
+        bottom: 0
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
@@ -59,7 +72,23 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
     }
   };
 
-  if (!initialPlaylist || initialPlaylist.length === 0 || !currentTrack) return null;
+  if (!initialPlaylist || initialPlaylist.length === 0 || !currentTrack) {
+    return (
+      <div className="flex flex-col gap-2 relative">
+        <div className="flex items-center gap-2 bg-slate-900/60 border border-white/10 rounded-2xl p-1.5 px-3 backdrop-blur-xl opacity-50 cursor-not-allowed" title="Add 'ambience_playlist' to your JSON settings">
+          <button disabled className="flex items-center justify-center p-2 rounded-xl bg-white/5 text-slate-500">
+            <Play className="w-4 h-4" />
+          </button>
+          <div className="flex items-center gap-2 px-2.5 py-2">
+            <Link2 className="w-4 h-4 text-slate-500" />
+            <span className="text-xs sm:text-sm font-semibold text-slate-500 truncate max-w-[120px]">
+              No Playlist in JSON
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2 relative">
@@ -164,6 +193,7 @@ export function AmbiencePlayer({ initialPlaylist = [] }: { initialPlaylist?: Arr
           dragControls={dragControls}
           dragListener={false}
           dragMomentum={false}
+          dragConstraints={bounds}
           className="fixed bottom-6 right-6 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-2xl z-[9999] w-[380px] max-w-[90vw] backdrop-blur-xl"
         >
           <div 
