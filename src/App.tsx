@@ -13,6 +13,7 @@ import ImportModal from './components/ImportModal';
 import Footer from './components/Footer';
 import AnimatedBackground from './components/AnimatedBackground';
 import ErrorBoundary from './components/ErrorBoundary';
+import { AmbiencePlayer } from './components/AmbiencePlayer';
 
 import { Menu, X, Download, Loader2, Sparkles, Wifi, WifiOff, Flame } from 'lucide-react';
 
@@ -765,6 +766,11 @@ const App: React.FC = () => {
             </nav>
 
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              {/* Ambience Player Widget */}
+              <div className="mr-1 sm:mr-2">
+                <AmbiencePlayer initialPlaylist={playlist} />
+              </div>
+              
               {/* Streak Badge */}
               {streak > 0 && (
                 <motion.div

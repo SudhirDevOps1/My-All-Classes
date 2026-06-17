@@ -290,42 +290,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, streak, playlist }) => {
         )}
       </motion.div>
 
-      {/* Ambience / Study Music Playlist */}
-      {playlist && playlist.length > 0 && (
-        <motion.div 
-          variants={itemVariants}
-          className="bg-slate-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.08] p-4 sm:p-6"
-        >
-          <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-            <span className="text-lg">🎵</span>
-            Focus Ambience Playlist
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-            {playlist.map((track) => (
-              <motion.a
-                key={track.id}
-                href={track.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.02, y: -2 }}
-                className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/[0.05] transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0 group-hover:bg-red-500 group-hover:text-white transition-all">
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-white truncate group-hover:text-purple-400 transition-colors">
-                    {track.name}
-                  </p>
-                  <p className="text-[10px] text-gray-500 truncate">YouTube Ambience</p>
-                </div>
-              </motion.a>
-            ))}
-          </div>
-        </motion.div>
-      )}
+
 
       {/* JSON Metadata (Data Export Details) */}
       <motion.div 
