@@ -77,11 +77,7 @@ const MOTIVATIONAL_QUOTES = [
   { text: "The secret of getting ahead is getting started.", author: "Mark Twain" }
 ];
 
-const DEFAULT_PLAYLIST = [
-  { id: '1', name: 'Deep Focus & Flow', url: 'https://www.youtube.com/watch?v=5qap5aO4i9A' },
-  { id: '2', name: 'Lofi Chill Study', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
-  { id: '3', name: 'Rain & Ambient Study', url: 'https://www.youtube.com/watch?v=mPZkdNFkNps' }
-];
+
 
 const DEFAULT_PROFILE = {
   name: "Study Guest",
@@ -603,7 +599,7 @@ const App: React.FC = () => {
     }
     // Fallbacks if not found in JSON
     if (!foundPlaylist) {
-      setPlaylist(DEFAULT_PLAYLIST);
+      setPlaylist([]); // Force empty if not in JSON!
     }
     if (!foundProfile) {
       setUserProfile(DEFAULT_PROFILE);
