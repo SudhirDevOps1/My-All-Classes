@@ -62,10 +62,12 @@ The data displayed here is the **source of truth** exported by the tracker app. 
 | 📤 **Export JSON** | Download the currently displayed day's data as `DD-MM-YYYY.json` |
 | 🔁 **Rescan** | One-click cache clear + fresh re-scan of the entire data directory |
 
+| 🎵 **JSON-Driven Music Player** | Play YouTube songs from your JSON `ambience_playlist` — draggable PiP video player via React Portal |
+| 👤 **User Profile from JSON** | Displays your name, age, profession & goal from JSON `user_profile` on the dashboard |
 | 🎨 **Premium UI/UX** | Glassmorphism, animated gradient orbs, floating particles, and Framer Motion micro-interactions |
 | 📱 **Fully Responsive** | Mobile-first design that scales from phones to ultra-wide desktops |
 | 🔒 **Privacy-First** | 100% client-side — no servers, no telemetry, no tracking |
-| ⚡ **Single-File Build** | Production build outputs one self-contained `index.html` (~490KB) — deploy anywhere |
+| ⚡ **Single-File Build** | Production build outputs one self-contained `index.html` (~500KB) — deploy anywhere |
 
 ---
 
@@ -267,7 +269,8 @@ flowtrack/
 │   │   ├── SessionDetailModal.tsx # Full session inspector (read-only)
 │   │   ├── QuickStats.tsx         # Compact 4-stat summary row
 │   │   ├── ImportModal.tsx        # Drag-and-drop / paste JSON importer
-│   │   ├── ErrorBoundary.tsx      # Graceful error handling per view
+│   │   ├── AmbiencePlayer.tsx  # JSON-driven YouTube music player with draggable PiP (React Portal)
+│   │   ├── ErrorBoundary.tsx   # Graceful error handling per view
 
 │   │   └── Footer.tsx             # Ecosystem links + credits
 │   ├── data/
@@ -397,6 +400,17 @@ open dist/index.html
 - **Planned vs Actual** — animated CSS bar chart comparison per subject
 - **Subject Details** — per-subject planned, actual, and color-coded efficiency percentage
 
+### 🎵 Music Player (PiP)
+- JSON-driven playlist from `ambience_playlist` setting — plays YouTube links
+- Draggable Picture-in-Picture video card rendered via **React Portal** (escapes CSS transform contexts)
+- Play/Pause, Next Track, Volume controls, and dropdown track selector
+- Fully responsive — works on mobile and desktop
+
+### 👤 User Profile
+- Displays `user_profile` data (name, age, profession, goal) from JSON on the dashboard
+- Beautiful gradient avatar with initials, profession badge, and goal card
+- Also shown in the sidebar for quick access
+
 ---
 
 ## 🛠️ Tech Stack
@@ -420,10 +434,12 @@ open dist/index.html
 
 1. **Strict Read-Only** — The JSON is the single source of truth. The UI never mutates session data; every number on screen maps 1:1 to a field in the export
 2. **Zero-Config Data** — Drop a file, it appears. No manifests, no config, no code changes
-3. **Glassmorphism Depth** — Translucent panels, backdrop blur, and animated gradient orbs create depth without distraction
-4. **Motion With Meaning** — Every animation communicates state, never decoration for its own sake
-5. **Mobile-First** — Layouts, tap targets, and typography scale from 320px phone to 4K monitor
-6. **Zero Backend** — Everything runs in the browser. Your study data never leaves your machine
+3. **JSON-Driven Everything** — Music playlist, user profile, and settings all come from JSON — change the data, the app updates
+4. **Glassmorphism Depth** — Translucent panels, backdrop blur, and animated gradient orbs create depth without distraction
+5. **Motion With Meaning** — Every animation communicates state, never decoration for its own sake
+6. **Mobile-First** — Layouts, tap targets, and typography scale from 320px phone to 4K monitor
+7. **Zero Backend** — Everything runs in the browser. Your study data never leaves your machine
+8. **Portal-Based PiP** — The music player uses React Portal to render at `<body>` level, escaping CSS transform contexts for proper fixed positioning
 
 ---
 

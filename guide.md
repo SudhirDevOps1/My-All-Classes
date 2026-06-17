@@ -45,10 +45,11 @@ My-All-Classes-main/
 │   ├── components/             # React visual UI components
 │   │   ├── Analytics.tsx       # Graphs, donut segment charts, stats
 │   │   ├── AnimatedBackground.tsx # Fluid ambient grid background animation
-│   │   ├── Dashboard.tsx       # Main stats, session highlights, playlists
+│   │   ├── Dashboard.tsx       # Main stats, session highlights, user profile banner
 │   │   ├── ErrorBoundary.tsx   # Recovers UI on crashes
 │   │   ├── Footer.tsx          # Copyright & build metadata
 │   │   ├── ImportModal.tsx     # JSON drag-and-drop importer
+│   │   ├── AmbiencePlayer.tsx  # JSON-driven YouTube music player with draggable PiP (React Portal)
 │   │   ├── QuickStats.tsx      # Cards showing study totals, streaks
 │   │   ├── SessionDetailModal.tsx # Information pop-up for clicking study items
 │   │   ├── Sidebar.tsx         # Date list, view mode toggles, User Profile
@@ -126,6 +127,15 @@ My-All-Classes-main/
 - **Role**: Renders an chronological checklist timeline of study sessions from early morning to night.
 - **What to change**: Vertical timeline connecting line color, dot symbols, or layout spacing.
 
+#### 5. [`AmbiencePlayer.tsx`](file:///e:/daily/my%20all%20classes/My-All-Classes-main%20(2)/My-All-Classes-main/src/components/AmbiencePlayer.tsx)
+- **Role**: JSON-driven YouTube music player. Reads `ambience_playlist` from JSON settings and renders a fully functional music control bar in the header.
+- **Key Features**:
+  - Play/Pause, Next Track, Volume slider, and dropdown track selector
+  - **Draggable PiP (Picture-in-Picture)** YouTube video card rendered via **React `createPortal`** directly to `<body>` — this is critical because the header uses `backdrop-blur` which creates a CSS transform context that breaks `position: fixed` on children
+  - YouTube video ID extraction from various URL formats (`youtu.be`, `youtube.com/watch`, etc.)
+  - Shows "No Playlist in JSON" if no tracks are available
+- **What to change**: PiP dimensions, drag constraints, track display format, or YouTube embed parameters.
+
 ---
 
 ### C. Logic Utilities (`src/utils/`)
@@ -157,6 +167,18 @@ My-All-Classes-main/
 ### 4. User Profile & Playlist Visual Widgets
 - **Problem**: Useful profile settings and audio play configurations were buried inside the raw settings of the JSON export file.
 - **Solution**: Designed the Sidebar User Profile block and the Dashboard Focus Ambience Playlist grid to render profile goals and playlists directly.
+
+### 5. React Portal for PiP Music Player
+- **Problem**: The AmbiencePlayer component lives inside `<header>`, which has `backdrop-blur-2xl`. CSS spec dictates that `backdrop-blur` (via `filter` or `backdrop-filter`) creates a new **containing block** for `position: fixed` children — meaning `fixed` behaves like `absolute` relative to the header, not the viewport. This caused the PiP video card to appear stuck behind/above the navbar instead of at the intended bottom-right corner.
+- **Solution**: Used React's `createPortal(element, document.body)` to render the PiP video card directly on `<body>`, completely escaping the header's transform context. The PiP now correctly uses viewport-relative `fixed` positioning.
+
+### 6. Settings Data Preservation in Multi-Date Parsing
+- **Problem**: When `registerDayDataGroups` grouped sessions by date into virtual `DayData` objects, it only copied `app`, `exportedAt`, `subjects`, and `sessions` — but not `settings`. This meant `ambience_playlist` and `user_profile` were silently dropped, causing the music player to show "No Playlist in JSON" and the profile to fall back to defaults.
+- **Solution**: Added `settings: data.settings` to the `datesMap` object creation in `registerDayDataGroups`, ensuring settings persist through the multi-date parsing pipeline.
+
+### 7. Raw Settings Hidden from UI
+- **Problem**: The Dashboard displayed a "Raw Settings Configuration" section showing all JSON settings as raw key-value pairs (including API keys, timer state, and internal config) — which was ugly and exposed internal data.
+- **Solution**: Removed the raw settings grid while keeping only the clean "Source App" and "Exported At" metadata fields.
 
 ---
 
@@ -231,3 +253,5 @@ Each date file dropped into `public/data/` or imported by the user follows this 
 2. **Defensive Parsing**: Always run validation tests on timestamps fetched externally. Validate with `!isNaN(new Date(value).getTime())` before using.
 3. **Single File Compatibility**: Avoid using dynamic import paths inside runtime logic because the bundle must compile into a single static file using `vite-plugin-singlefile`.
 4. **Local Storage Limits**: Keep cached payloads optimal. Deduplicate files and clean out CACHE prefixes during major re-scans.
+5. **Portal-Based Fixed Positioning**: If any `fixed`-positioned element appears inside a parent with `backdrop-blur`, `transform`, or `filter`, it will NOT be viewport-relative. Use `createPortal(element, document.body)` to escape.
+6. **Settings Preservation**: When grouping multi-date sessions in `registerDayDataGroups`, always copy `data.settings` into the virtual `DayData` object — otherwise JSON settings (playlist, profile, theme) will be silently dropped.
