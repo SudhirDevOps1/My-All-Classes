@@ -326,22 +326,37 @@ const App: React.FC = () => {
         const batch = uniqueCandidates.slice(i, i + BATCH);
         const results = await Promise.all(
           batch.map(async (filename) => {
-            const dateKey = filename.replace('.json', '');
-            // Skip if we already have this date loaded
-            if (loadedDatesRef.current[dateKey]) return null;
             try {
               const data = await fetchJsonFromSources<DayData>(`/data/${filename}`);
               if (data) {
-                const [day, month, year] = dateKey.split('-').map(Number);
-                if (day && month && year) {
-                  return { dateKey, data, date: new Date(year, month - 1, day) };
+                const datesFound: { dateKey: string; data: DayData; date: Date }[] = [];
+                const addDate = (d: Date) => {
+                  if (isNaN(d.getTime())) return;
+                  const dd = String(d.getDate()).padStart(2, '0');
+                  const mm = String(d.getMonth() + 1).padStart(2, '0');
+                  const yyyy = d.getFullYear();
+                  const dateKey = `${dd}-${mm}-${yyyy}`;
+                  datesFound.push({ dateKey, data, date: new Date(yyyy, d.getMonth(), d.getDate()) });
+                };
+
+                if (Array.isArray(data.sessions)) {
+                  data.sessions.forEach(s => {
+                    if (s.startTime) addDate(new Date(s.startTime));
+                  });
                 }
+                if (data.exportedAt) {
+                  addDate(new Date(data.exportedAt));
+                }
+                return datesFound;
               }
             } catch {}
-            return null;
+            return [];
           })
         );
-        newlyFound.push(...results.filter(Boolean) as { dateKey: string; data: DayData; date: Date }[]);
+        
+        results.forEach(datesArray => {
+           datesArray.forEach(item => newlyFound.push(item));
+        });
       }
 
       if (isCancelled || newlyFound.length === 0) return;
@@ -349,7 +364,26 @@ const App: React.FC = () => {
       // Merge newly found data into state
       setLoadedDates(prev => {
         const next = { ...prev };
-        newlyFound.forEach(({ dateKey, data }) => { next[dateKey] = data; });
+        newlyFound.forEach(({ dateKey, data }) => { 
+          if (!next[dateKey]) {
+            next[dateKey] = { app: data.app, exportedAt: data.exportedAt, subjects: data.subjects || [], sessions: [] };
+          }
+          if (Array.isArray(data.sessions)) {
+            data.sessions.forEach(session => {
+              if (session.startTime) {
+                 const d = new Date(session.startTime);
+                 if (!isNaN(d.getTime())) {
+                   const dd = String(d.getDate()).padStart(2, '0');
+                   const mm = String(d.getMonth() + 1).padStart(2, '0');
+                   const yyyy = d.getFullYear();
+                   if (`${dd}-${mm}-${yyyy}` === dateKey && !next[dateKey].sessions.some(s => s.id === session.id)) {
+                     next[dateKey].sessions.push(session);
+                   }
+                 }
+              }
+            });
+          }
+        });
         loadedDatesRef.current = next;
         return next;
       });
