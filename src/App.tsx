@@ -1028,7 +1028,7 @@ const App: React.FC = () => {
                 >
                   <ErrorBoundary key={`eb-${viewMode}`}>
                     {viewMode === 'dashboard' && (
-                      <Dashboard data={dayData} streak={streak} playlist={playlist} />
+                      <Dashboard data={dayData} streak={streak} userProfile={userProfile} />
                     )}
                     {viewMode === 'timeline' && (
                       <Timeline data={dayData} />

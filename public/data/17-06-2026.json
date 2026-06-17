@@ -1,6 +1,6 @@
 {
   "app": "FlowTrack",
-  "exportedAt": "2026-06-17T13:31:59.991Z",
+  "exportedAt": "2026-06-17T13:57:43.422Z",
   "subjects": [
     {
       "id": "ai_ml_001",
@@ -409,7 +409,7 @@
     },
     {
       "key": "focusMusicEnabled",
-      "value": "false"
+      "value": "true"
     },
     {
       "key": "keyboardShortcutsEnabled",

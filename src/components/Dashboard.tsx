@@ -7,10 +7,10 @@ import { Clock, Target, Zap, ChevronRight, TrendingUp, Award } from 'lucide-reac
 import SessionDetailModal from './SessionDetailModal';
 import QuickStats from './QuickStats';
 
-interface DashboardProps {
+export interface DashboardProps {
   data: DayData;
-  streak?: number;
-  playlist?: { id: string; name: string; url: string }[];
+  streak: number;
+  userProfile?: { name: string; avatar?: string; age?: string; profession?: string; goal?: string } | null;
 }
 
 const containerVariants = {
@@ -32,7 +32,7 @@ const itemVariants = {
   }
 };
 
-const Dashboard: React.FC<DashboardProps> = ({ data, streak }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, streak, userProfile }) => {
   const stats = calculateDayStats(data);
   const upcomingSession = getUpcomingSession(data.sessions);
   const currentSession = getCurrentSession(data.sessions);
@@ -57,6 +57,37 @@ const Dashboard: React.FC<DashboardProps> = ({ data, streak }) => {
       initial="hidden"
       animate="visible"
     >
+      {/* User Info Banner */}
+      {userProfile && (
+        <motion.div variants={itemVariants} className="bg-gradient-to-r from-purple-500/10 via-slate-800/50 to-blue-500/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            {userProfile.avatar ? (
+              <img src={userProfile.avatar} alt="Avatar" className="w-12 h-12 rounded-xl object-cover border border-white/20" />
+            ) : (
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-lg font-bold text-white shadow-inner">
+                {userProfile.name?.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">{userProfile.name}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                {userProfile.profession && <span className="text-xs font-medium text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-md border border-purple-500/20">{userProfile.profession}</span>}
+                {userProfile.age && <span className="text-xs text-slate-400">• Age: {userProfile.age}</span>}
+              </div>
+            </div>
+          </div>
+          {userProfile.goal && (
+            <div className="flex items-center gap-2 bg-slate-900/50 px-4 py-2 rounded-xl border border-white/5">
+              <span className="text-xl">🎯</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Current Goal</span>
+                <span className="text-sm font-bold text-white">{userProfile.goal}</span>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+
       {/* Quick Stats Row */}
       <motion.div variants={itemVariants}>
         <QuickStats data={data} streak={streak} />
