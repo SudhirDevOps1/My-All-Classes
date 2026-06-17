@@ -130,6 +130,7 @@ const App: React.FC = () => {
               app: data.app,
               exportedAt: data.exportedAt,
               subjects: data.subjects,
+              settings: data.settings,
               sessions: []
             };
           }
