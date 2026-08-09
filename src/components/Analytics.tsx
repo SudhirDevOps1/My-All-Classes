@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { DayData } from '../types';
 import { calculateDayStats, normalizeStatus } from '../utils/statsUtils';
 import { formatDuration, formatDurationMinutes } from '../utils/dateUtils';
-import { TrendingUp, Calendar, Target, Award } from 'lucide-react';
+import { TrendingUp, Calendar, Target, Award, Monitor, ShieldAlert } from 'lucide-react';
 
 interface AnalyticsProps {
   data: DayData;
@@ -297,6 +297,66 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
           </div>
         </div>
       </div>
+
+      {/* ── App Usage & Screen Time ── */}
+      {data.appUsage && data.appUsage.length > 0 && (
+        <motion.div
+          className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.1] p-4 sm:p-6 shadow-2xl shadow-cyan-500/10"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Monitor className="w-5 h-5 text-cyan-400" />
+            Top Apps & Websites (Screen Time)
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {Object.entries(
+              data.appUsage.reduce((acc, curr) => {
+                acc[curr.appName] = (acc[curr.appName] || 0) + curr.durationSeconds;
+                return acc;
+              }, {} as Record<string, number>)
+            )
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 6)
+              .map(([appName, duration], idx) => (
+                <div key={appName} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <span className="text-sm font-medium text-white truncate">{appName}</span>
+                  </div>
+                  <span className="text-xs font-bold text-cyan-300 whitespace-nowrap">{formatDuration(duration)}</span>
+                </div>
+              ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Block Rules ── */}
+      {data.blockRules && data.blockRules.length > 0 && (
+        <motion.div
+          className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.1] p-4 sm:p-6 shadow-2xl shadow-rose-500/10"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-rose-400" />
+            Active Block Rules
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {data.blockRules.filter(r => r.blocked).map((rule) => (
+              <div key={rule.id} className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                <span className="text-sm text-rose-200">{rule.appName}</span>
+                <span className="text-[10px] uppercase text-rose-400/70 border border-rose-500/20 px-1.5 py-0.5 rounded">{rule.strictLevel}</span>
+              </div>
+            ))}
+            {data.blockRules.filter(r => r.blocked).length === 0 && (
+              <p className="text-sm text-gray-500">No active block rules.</p>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* ── Subject Details ── */}
       <motion.div

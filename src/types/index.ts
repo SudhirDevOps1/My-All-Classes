@@ -29,12 +29,33 @@ export interface SettingEntry {
   value: string;
 }
 
+export interface AppUsageRecord {
+  id?: string;
+  appName: string;
+  title?: string;
+  durationSeconds: number;
+  date: string;
+  hour: number;
+  startTime: string;
+}
+
+export interface BlockRule {
+  id: string;
+  appName: string;
+  blocked: boolean;
+  strictLevel: string;
+  category: string;
+  ruleType: string;
+}
+
 export interface DayData {
   app: string;
   exportedAt: string;
   subjects: Subject[];
   sessions: StudySession[];
   settings?: SettingEntry[];
+  appUsage?: AppUsageRecord[];
+  blockRules?: BlockRule[];
 }
 
 export interface DayStats {
