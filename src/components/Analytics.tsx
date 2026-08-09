@@ -274,7 +274,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
       {/* ── Charts Grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Donut */}
-        <div className="bg-slate-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.08] p-4 sm:p-6">
+        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.1] p-4 sm:p-6 shadow-2xl shadow-purple-500/10">
           <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Time Distribution</h3>
           <div className="min-h-[240px] flex items-center justify-center">
             {pieData.length === 0 ? (
@@ -286,7 +286,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
         </div>
 
         {/* Bars */}
-        <div className="bg-slate-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.08] p-4 sm:p-6">
+        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.1] p-4 sm:p-6 shadow-2xl shadow-blue-500/10">
           <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Planned vs Actual</h3>
           <div className="min-h-[240px] flex items-center justify-center">
             {barData.length === 0 ? (
@@ -300,7 +300,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
 
       {/* ── Subject Details ── */}
       <motion.div
-        className="bg-slate-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.08] p-4 sm:p-6"
+        className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.1] p-4 sm:p-6 shadow-2xl shadow-emerald-500/10"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
@@ -321,7 +321,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
             return (
               <motion.div
                 key={subject.subjectId}
-                className="p-4 rounded-xl bg-white/5 border border-white/5"
+                className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors shadow-lg"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 + index * 0.1 }}

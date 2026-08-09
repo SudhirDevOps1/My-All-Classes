@@ -14,8 +14,9 @@ import Footer from './components/Footer';
 import AnimatedBackground from './components/AnimatedBackground';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AmbiencePlayer } from './components/AmbiencePlayer';
+import { fetchCloudData } from './lib/neonClient';
 
-import { Menu, X, Download, Loader2, Sparkles, Flame } from 'lucide-react';
+import { Menu, X, Download, Loader2, Sparkles, Flame, Database, Save } from 'lucide-react';
 
 const STORAGE_PREFIX = 'flowtrack_';
 const CACHE_PREFIX = 'flowtrack_cache_';
@@ -97,6 +98,7 @@ const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showImport, setShowImport] = useState(false);
+
   const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
   const loadedDatesRef = useRef<DateDataMap>({});
 
@@ -106,147 +108,25 @@ const App: React.FC = () => {
 
   const autoScanFiles = useCallback(async () => {
     setScanning(true);
-    const datesMap: DateDataMap = {};
-    const dates: Date[] = [];
-    const dateStrings = new Set<string>();
-
-    // Helper to group sessions by date from any DayData file
-    const registerDayDataGroups = (data: DayData) => {
-      if (!data) return;
-      
-      // Group sessions by date
-      if (Array.isArray(data.sessions)) {
-        data.sessions.forEach(session => {
-          if (!session.startTime) return;
-          const d = new Date(session.startTime);
-          if (isNaN(d.getTime())) return;
-          const dd = String(d.getDate()).padStart(2, '0');
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const yyyy = d.getFullYear();
-          const dateKey = `${dd}-${mm}-${yyyy}`;
-
-          if (!datesMap[dateKey]) {
-            datesMap[dateKey] = {
-              app: data.app,
-              exportedAt: data.exportedAt,
-              subjects: data.subjects,
-              settings: data.settings,
-              sessions: []
-            };
-          }
-
-          const sessionExists = datesMap[dateKey].sessions.some(s => s.id === session.id);
-          if (!sessionExists) {
-            datesMap[dateKey].sessions.push(session);
-          }
-
-          if (!dateStrings.has(dateKey)) {
-            dates.push(new Date(yyyy, d.getMonth(), d.getDate()));
-            dateStrings.add(dateKey);
-          }
-        });
-      }
-
-      // Also ensure the date representing the file/export date itself is registered even if it had no sessions
-      if (data.exportedAt) {
-        const d = new Date(data.exportedAt);
-        if (!isNaN(d.getTime())) {
-          const dd = String(d.getDate()).padStart(2, '0');
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const yyyy = d.getFullYear();
-          const dateKey = `${dd}-${mm}-${yyyy}`;
-          if (!datesMap[dateKey]) {
-            datesMap[dateKey] = {
-              app: data.app,
-              exportedAt: data.exportedAt,
-              subjects: data.subjects,
-              sessions: []
-            };
-          }
-          if (!dateStrings.has(dateKey)) {
-            dates.push(new Date(yyyy, d.getMonth(), d.getDate()));
-            dateStrings.add(dateKey);
-          }
-        }
-      }
-    };
-
-    // ── Step 1: Load localStorage data immediately ──────────────────
-    const registerLocalEntry = (_dateKey: string, raw: string | null) => {
-      if (!raw) return;
-      try {
-        const data = JSON.parse(raw) as DayData;
-        registerDayDataGroups(data);
-      } catch {}
-    };
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(STORAGE_PREFIX) && !key.startsWith(CACHE_PREFIX)) {
-        registerLocalEntry(key.replace(STORAGE_PREFIX, ''), localStorage.getItem(key));
-      }
+    
+    const neonData = await fetchCloudData();
+    if (neonData) {
+      setLoadedDates(neonData.datesMap);
+      loadedDatesRef.current = neonData.datesMap;
+      setAvailableDates(neonData.sortedDates);
+      setScanning(false);
+      return neonData;
     }
 
-    // ── Step 2: Build list of candidate filenames to scan ───────────
-    // Merge only: manifest list + fallback list
-    let manifestFiles: string[] = [];
-    try {
-      const manifest = await fetchJsonFromSources<{ files?: string[] }>(MANIFEST_URL);
-      if (manifest && Array.isArray(manifest.files)) {
-        manifestFiles = manifest.files;
-      }
-    } catch {}
-
-    // Deduplicate, then append any localStorage-only dates not yet in the list
-    const allCandidateFiles = [...new Set([
-      ...manifestFiles,
-      ...availableDataFiles,
-    ])];
-
-    // ── Step 3: Fetch every candidate in parallel (batches of 20) ──
-    const BATCH_SIZE = 20;
-    setScanProgress({ current: 0, total: allCandidateFiles.length });
-
-    const fetchFile = async (filename: string) => {
-      try {
-        const data = await fetchJsonFromSources<DayData>(`/data/${filename}`);
-        if (data) {
-          registerDayDataGroups(data);
-          try {
-            localStorage.setItem(CACHE_PREFIX + filename.replace('.json', ''), JSON.stringify(data));
-          } catch {}
-        }
-      } catch {}
-      setScanProgress(prev => ({ ...prev, current: Math.min(prev.current + 1, prev.total) }));
-    };
-
-    // Run fetches in batches of 20 to avoid overwhelming the browser
-    for (let i = 0; i < allCandidateFiles.length; i += BATCH_SIZE) {
-      const batch = allCandidateFiles.slice(i, i + BATCH_SIZE);
-      await Promise.all(batch.map((f) => fetchFile(f)));
-    }
-
-    // ── Step 3.5: Fall back to cached offline fetched data (CACHE_PREFIX) ──
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(CACHE_PREFIX)) {
-        registerLocalEntry(key.replace(CACHE_PREFIX, ''), localStorage.getItem(key));
-      }
-    }
-
-    // ── Step 4: Merge bundled sample data as the lowest priority ────
-    Object.keys(sampleData).forEach(key => {
-      registerDayDataGroups(sampleData[key]);
-    });
-
-    const sortedDates = dates.sort((a, b) => b.getTime() - a.getTime());
-    setAvailableDates(sortedDates);
-    loadedDatesRef.current = datesMap;
-    setLoadedDates(datesMap);
+    // Fallback: If no neon data (no connection string), return empty
+    const emptyMap: DateDataMap = {};
+    setLoadedDates(emptyMap);
+    loadedDatesRef.current = emptyMap;
+    setAvailableDates([]);
     setScanning(false);
-
-    return { datesMap, sortedDates };
+    return { datesMap: emptyMap, sortedDates: [] };
   }, []);
+
 
   /**
    * Filter sessions in DayData to only those whose startTime (UTC) falls on the
@@ -799,6 +679,8 @@ const App: React.FC = () => {
               <div className="mr-1 sm:mr-2">
                 <AmbiencePlayer initialPlaylist={playlist} />
               </div>
+
+
               
               {/* Streak Badge */}
               {streak > 0 && (
@@ -1053,6 +935,8 @@ const App: React.FC = () => {
           onImport={handleImport}
         />
       )}
+
+
 
     </div>
   );

@@ -184,7 +184,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, streak, userProfile }) => {
       {/* Subject Progress */}
       <motion.div 
         variants={itemVariants}
-        className="bg-slate-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.08] p-4 sm:p-6"
+        className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.1] p-4 sm:p-6 shadow-2xl shadow-purple-500/10"
       >
         <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
           <Target className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
@@ -239,7 +239,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, streak, userProfile }) => {
       {/* Sessions List - READ ONLY with click for details */}
       <motion.div 
         variants={itemVariants}
-        className="bg-slate-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.08] p-4 sm:p-6"
+        className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/[0.1] p-4 sm:p-6 shadow-2xl shadow-blue-500/10"
       >
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
