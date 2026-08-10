@@ -9,11 +9,30 @@ export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayDa
       return null;
     }
 
-    const { subjects, sessions } = await response.json();
+    const { subjects, sessions, appUsage, blockRules } = await response.json();
 
     if (!subjects || !sessions) {
       console.error("Invalid response format from /api/data");
       return null;
+    }
+
+    // Group app usage by Date
+    const appUsageByDate: Record<string, any[]> = {};
+    if (appUsage && Array.isArray(appUsage)) {
+      appUsage.forEach(record => {
+        let d;
+        if (record.startTime) d = new Date(record.startTime);
+        else if (record.date) d = new Date(record.date);
+        
+        if (d && !isNaN(d.getTime())) {
+          const dd = String(d.getDate()).padStart(2, '0');
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const yyyy = d.getFullYear();
+          const key = `${dd}-${mm}-${yyyy}`;
+          if (!appUsageByDate[key]) appUsageByDate[key] = [];
+          appUsageByDate[key].push(record);
+        }
+      });
     }
 
     // Group sessions by Date to match the DayData format the app expects
@@ -36,7 +55,9 @@ export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayDa
           app: 'FlowTrack Pro Cloud',
           exportedAt: new Date().toISOString(),
           subjects: subjects,
-          sessions: []
+          sessions: [],
+          appUsage: appUsageByDate[dateKey] || [],
+          blockRules: blockRules || []
         };
       }
 
@@ -48,6 +69,25 @@ export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayDa
       if (!dateStrings.has(dateKey)) {
         dates.push(new Date(yyyy, d.getMonth(), d.getDate()));
         dateStrings.add(dateKey);
+      }
+    });
+
+    // Also ensure dates that only have appUsage but no sessions are created
+    Object.keys(appUsageByDate).forEach(dateKey => {
+      if (!datesMap[dateKey]) {
+        datesMap[dateKey] = {
+          app: 'FlowTrack Pro Cloud',
+          exportedAt: new Date().toISOString(),
+          subjects: subjects,
+          sessions: [],
+          appUsage: appUsageByDate[dateKey] || [],
+          blockRules: blockRules || []
+        };
+        const parts = dateKey.split('-');
+        if (parts.length === 3 && !dateStrings.has(dateKey)) {
+          dates.push(new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0])));
+          dateStrings.add(dateKey);
+        }
       }
     });
 
@@ -63,7 +103,9 @@ export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayDa
            app: 'FlowTrack Pro Cloud',
            exportedAt: new Date().toISOString(),
            subjects: subjects,
-           sessions: []
+           sessions: [],
+           appUsage: appUsageByDate[dateKey] || [],
+           blockRules: blockRules || []
        };
        dates.push(new Date(yyyy, today.getMonth(), today.getDate()));
     }
