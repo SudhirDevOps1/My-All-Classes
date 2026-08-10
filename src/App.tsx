@@ -136,6 +136,9 @@ const App: React.FC = () => {
    * of the user's local timezone.
    */
   const filterDataForDate = useCallback((data: DayData, targetDate: Date): DayData => {
+    // Cloud data is perfectly mapped by neonClient.ts, no need to double-filter
+    if (data.app === 'FlowTrack Pro Cloud') return data;
+
     // Build the target date in UTC to match ISO timestamp dates
     const targetDay = targetDate.getDate();
     const targetMonth = targetDate.getMonth();
