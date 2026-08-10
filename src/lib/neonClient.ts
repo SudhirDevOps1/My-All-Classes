@@ -34,31 +34,31 @@ export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayDa
 
     const mappedSessions = (sessions || []).map((s: any) => ({
       id: s.id,
-      subjectId: s.subjectid || s.subject_id,
-      startTime: s.starttime || s.start_time,
-      endTime: s.endtime || s.end_time,
-      plannedMinutes: s.plannedminutes || s.planned_minutes,
-      actualSeconds: s.actualseconds || s.actual_seconds,
+      subjectId: s.subjectid ?? s.subject_id,
+      startTime: s.starttime ?? s.start_time,
+      endTime: s.endtime ?? s.end_time,
+      plannedMinutes: Number(s.plannedminutes ?? s.planned_minutes ?? 0),
+      actualSeconds: Number(s.actualseconds ?? s.actual_seconds ?? 0),
       status: s.status,
-      colorTag: s.colortag || s.color_tag,
+      colorTag: s.colortag ?? s.color_tag,
       notes: s.notes,
       tags: s.tags,
-      createdAt: s.createdat || s.created_at,
-      updatedAt: s.updatedat || s.updated_at,
-      manualEntry: s.manualentry || s.manual_entry,
-      seriesId: s.seriesid || s.series_id,
-      parentSessionId: s.parentsessionid || s.parent_session_id,
+      createdAt: s.createdat ?? s.created_at,
+      updatedAt: s.updatedat ?? s.updated_at,
+      manualEntry: s.manualentry ?? s.manual_entry ?? false,
+      seriesId: s.seriesid ?? s.series_id,
+      parentSessionId: s.parentsessionid ?? s.parent_session_id,
       recurrence: s.recurrence
     }));
 
     const mappedAppUsage = (appUsage || []).map((a: any) => ({
       id: a.id,
-      appName: a.appname || a.app_name,
+      appName: a.appname ?? a.app_name,
       title: a.title,
-      durationSeconds: a.durationseconds || a.duration_seconds,
+      durationSeconds: Number(a.durationseconds ?? a.duration_seconds ?? 0),
       date: a.date,
       hour: a.hour,
-      startTime: a.starttime || a.start_time
+      startTime: a.starttime ?? a.start_time
     }));
 
     // Group app usage by Date
