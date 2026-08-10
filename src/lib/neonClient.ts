@@ -2,7 +2,7 @@ import { DayData, StudySession, Subject } from '../types';
 
 export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayData>, sortedDates: Date[] } | null> => {
   try {
-    const response = await fetch('/api/data');
+    const response = await fetch('/api/data', { cache: 'no-store' });
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       console.error("Cloud fetch failed with status:", response.status, errData);
@@ -37,12 +37,12 @@ export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayDa
       subjectId: s.subjectid ?? s.subject_id,
       startTime: s.starttime ?? s.start_time,
       endTime: s.endtime ?? s.end_time,
-      plannedMinutes: Number(s.plannedminutes ?? s.planned_minutes ?? 0),
-      actualSeconds: Number(s.actualseconds ?? s.actual_seconds ?? 0),
+      plannedMinutes: Number(s.plannedminutes ?? s.planned_minutes) || 0,
+      actualSeconds: Number(s.actualseconds ?? s.actual_seconds) || 0,
       status: s.status,
-      colorTag: s.colortag ?? s.color_tag,
-      notes: s.notes,
-      tags: s.tags,
+      colorTag: s.colortag ?? s.color_tag ?? mappedSubjects.find(sub => sub.id === (s.subjectid ?? s.subject_id))?.color ?? '#3b82f6',
+      notes: s.notes ?? '',
+      tags: s.tags ?? [],
       createdAt: s.createdat ?? s.created_at,
       updatedAt: s.updatedat ?? s.updated_at,
       manualEntry: s.manualentry ?? s.manual_entry ?? false,
@@ -55,7 +55,7 @@ export const fetchCloudData = async (): Promise<{ datesMap: Record<string, DayDa
       id: a.id,
       appName: a.appname ?? a.app_name,
       title: a.title,
-      durationSeconds: Number(a.durationseconds ?? a.duration_seconds ?? 0),
+      durationSeconds: Number(a.durationseconds ?? a.duration_seconds) || 0,
       date: a.date,
       hour: a.hour,
       startTime: a.starttime ?? a.start_time
