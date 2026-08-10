@@ -240,31 +240,6 @@ const App: React.FC = () => {
       } catch {}
     }
 
-    // 3. Fall back to cached SWR data (already in state from auto-scan)
-    if (loadedDatesRef.current[dateKey]) {
-      setDayData(filterDataForDate(loadedDatesRef.current[dateKey], date));
-      setLoading(false);
-      return;
-    }
-
-    // 4. Fall back to cached data in localStorage
-    const cachedStored = localStorage.getItem(CACHE_PREFIX + dateKey);
-    if (cachedStored) {
-      try {
-        const data = JSON.parse(cachedStored) as DayData;
-        setDayData(filterDataForDate(data, date));
-        setLoading(false);
-        return;
-      } catch {}
-    }
-
-    // 5. Fall back to bundled samples
-    if (sampleData[dateKey]) {
-      setDayData(filterDataForDate(sampleData[dateKey], date));
-      setLoading(false);
-      return;
-    }
-
     setDayData(null);
     setLoading(false);
   }, [filterDataForDate]);
