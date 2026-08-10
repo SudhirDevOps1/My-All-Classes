@@ -189,105 +189,18 @@ const App: React.FC = () => {
     init();
   }, [autoScanFiles, filterDataForDate]);
 
-  // ── Auto-refresh: poll for new files every 60s + on tab focus ──────
+  // ── Auto-refresh: poll for new data every 60s + on tab focus ──────
   useEffect(() => {
     let isCancelled = false;
 
     const silentScan = async () => {
       // Lightweight background scan — no loading spinner
-      const candidates: string[] = [];
-
-      // Re-fetch manifest for any newly listed files
-      try {
-        const manifest = await fetchJsonFromSources<{ files?: string[] }>(MANIFEST_URL);
-        if (manifest?.files) candidates.push(...manifest.files);
-      } catch {}
-
-      const uniqueCandidates = [...new Set([
-        ...candidates,
-        ...availableDataFiles
-      ])];
-      const newlyFound: { dateKey: string; data: DayData; date: Date }[] = [];
-
-      const BATCH = 20;
-      for (let i = 0; i < uniqueCandidates.length; i += BATCH) {
-        if (isCancelled) return;
-        const batch = uniqueCandidates.slice(i, i + BATCH);
-        const results = await Promise.all(
-          batch.map(async (filename) => {
-            try {
-              const data = await fetchJsonFromSources<DayData>(`/data/${filename}`);
-              if (data) {
-                const datesFound: { dateKey: string; data: DayData; date: Date }[] = [];
-                const addDate = (d: Date) => {
-                  if (isNaN(d.getTime())) return;
-                  const dd = String(d.getDate()).padStart(2, '0');
-                  const mm = String(d.getMonth() + 1).padStart(2, '0');
-                  const yyyy = d.getFullYear();
-                  const dateKey = `${dd}-${mm}-${yyyy}`;
-                  datesFound.push({ dateKey, data, date: new Date(yyyy, d.getMonth(), d.getDate()) });
-                };
-
-                if (Array.isArray(data.sessions)) {
-                  data.sessions.forEach(s => {
-                    if (s.startTime) addDate(new Date(s.startTime));
-                  });
-                }
-                if (data.exportedAt) {
-                  addDate(new Date(data.exportedAt));
-                }
-                return datesFound;
-              }
-            } catch {}
-            return [];
-          })
-        );
-        
-        results.forEach(datesArray => {
-           datesArray.forEach(item => newlyFound.push(item));
-        });
+      const neonData = await fetchCloudData();
+      if (neonData && !isCancelled) {
+        setLoadedDates(neonData.datesMap);
+        loadedDatesRef.current = neonData.datesMap;
+        setAvailableDates(neonData.sortedDates);
       }
-
-      if (isCancelled || newlyFound.length === 0) return;
-
-      // Merge newly found data into state
-      setLoadedDates(prev => {
-        const next = { ...prev };
-        newlyFound.forEach(({ dateKey, data }) => { 
-          if (!next[dateKey]) {
-            next[dateKey] = { app: data.app, exportedAt: data.exportedAt, subjects: data.subjects || [], sessions: [] };
-          }
-          if (Array.isArray(data.sessions)) {
-            data.sessions.forEach(session => {
-              if (session.startTime) {
-                 const d = new Date(session.startTime);
-                 if (!isNaN(d.getTime())) {
-                   const dd = String(d.getDate()).padStart(2, '0');
-                   const mm = String(d.getMonth() + 1).padStart(2, '0');
-                   const yyyy = d.getFullYear();
-                   if (`${dd}-${mm}-${yyyy}` === dateKey && !next[dateKey].sessions.some(s => s.id === session.id)) {
-                     next[dateKey].sessions.push(session);
-                   }
-                 }
-              }
-            });
-          }
-        });
-        loadedDatesRef.current = next;
-        return next;
-      });
-      setAvailableDates(prev => {
-        const existingKeys = new Set(prev.map(d => formatDateForFile(d)));
-        const newDates = newlyFound
-          .filter(({ dateKey }) => !existingKeys.has(dateKey))
-          .map(({ date }) => date);
-        if (newDates.length === 0) return prev;
-        return [...prev, ...newDates].sort((a, b) => b.getTime() - a.getTime());
-      });
-      // Cache new data in localStorage
-      newlyFound.forEach(({ dateKey, data }) => {
-        try { localStorage.setItem(CACHE_PREFIX + dateKey, JSON.stringify(data)); } catch {}
-      });
     };
 
     // Poll every 60 seconds
@@ -306,74 +219,17 @@ const App: React.FC = () => {
 
   const loadDataForDate = useCallback(async (date: Date) => {
     setLoading(true);
-    const filename = formatDateForFile(date);           // e.g. "12-06-2026" (no .json)
+    const filename = formatDateForFile(date);           // e.g. "12-06-2026"
     const dateKey = filename;                            // e.g. "12-06-2026"
-    const jsonFilename = `${filename}.json`;             // e.g. "12-06-2026.json"
 
-    try {
-      // 1. Always attempt to fetch fresh online data first (Live Server Fetch)
-      const freshData = await fetchJsonFromSources<DayData>(`/data/${jsonFilename}`);
-      if (freshData) {
-        const newDatesMap = { ...loadedDatesRef.current };
-        const newDatesToAdd: Date[] = [];
+    // 1. Fall back to cached SWR data (already in state from auto-scan)
+    if (loadedDatesRef.current[dateKey]) {
+      setDayData(filterDataForDate(loadedDatesRef.current[dateKey], date));
+      setLoading(false);
+      return;
+    }
 
-        const registerDayDataGroupsLocal = (d: DayData) => {
-          if (!d || !Array.isArray(d.sessions)) return;
-          d.sessions.forEach(session => {
-            if (!session.startTime) return;
-            const dateObj = new Date(session.startTime);
-            if (isNaN(dateObj.getTime())) return;
-            const dd = String(dateObj.getDate()).padStart(2, '0');
-            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const yyyy = dateObj.getFullYear();
-            const dateK = `${dd}-${mm}-${yyyy}`;
-
-            if (!newDatesMap[dateK]) {
-              newDatesMap[dateK] = {
-                app: d.app,
-                exportedAt: d.exportedAt,
-                subjects: d.subjects,
-                sessions: []
-              };
-            }
-            const exists = newDatesMap[dateK].sessions.some(s => s.id === session.id);
-            if (!exists) newDatesMap[dateK].sessions.push(session);
-
-            newDatesToAdd.push(new Date(yyyy, dateObj.getMonth(), dateObj.getDate()));
-          });
-        };
-
-        registerDayDataGroupsLocal(freshData);
-
-        setLoadedDates(newDatesMap);
-        loadedDatesRef.current = newDatesMap;
-        
-        setAvailableDates(prevDates => {
-          const dateStringsSet = new Set(prevDates.map(d => formatDateForFile(d)));
-          let updated = false;
-          const newDatesList = [...prevDates];
-          newDatesToAdd.forEach(d => {
-            const k = formatDateForFile(d);
-            if (!dateStringsSet.has(k)) {
-              newDatesList.push(d);
-              dateStringsSet.add(k);
-              updated = true;
-            }
-          });
-          return updated ? newDatesList.sort((a, b) => b.getTime() - a.getTime()) : prevDates;
-        });
-
-        setDayData(filterDataForDate(newDatesMap[dateKey] || freshData, date));
-
-        try {
-          localStorage.setItem(CACHE_PREFIX + dateKey, JSON.stringify(freshData));
-        } catch {}
-        setLoading(false);
-        return;
-      }
-    } catch {}
-
-    // 2. Fall back to manual user imports if online fetch failed or 404
+    // 2. Fall back to manual user imports
     const userStored = localStorage.getItem(STORAGE_PREFIX + dateKey);
     if (userStored) {
       try {
